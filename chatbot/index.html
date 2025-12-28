@@ -3,6 +3,17 @@
 <head>
 <title>Chatbot</title>
 <style>
+  :root {
+    --primary-rgb: 56, 97, 255; /* calm blue */
+    --primary: rgb(var(--primary-rgb));
+    --primary-contrast: #ffffff;
+    --accent-rgb: 34, 197, 94; /* friendly green */
+    --accent: rgb(var(--accent-rgb));
+    --surface: #ffffff;
+    --border: #e2e8f0; /* slate-200 */
+    --text: #1f2937;   /* slate-800 */
+    --muted: #64748b;  /* slate-500 */
+  }
   html, body {
     height: 100%;
     overflow: hidden; /* Prevent page-level scrolling */
@@ -61,23 +72,64 @@
   
   form {
     display: flex;
+    gap: 10px;
+    align-items: stretch;
   }
   
-  input {
+  /* Multiline message input */
+  #user-input {
     flex-grow: 1;
-    margin-right: 10px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+    padding: 12px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    min-height: 96px; /* allow multiple lines */
+    line-height: 1.5;
+    resize: vertical; /* user can expand if needed */
+    overflow-y: auto;
+    box-sizing: border-box;
+    font-family: inherit;
+    font-size: 16px;
+    color: var(--text);
+    background-color: var(--surface);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    transition: border-color .15s ease, box-shadow .15s ease, transform .05s ease;
+  }
+  #user-input::placeholder {
+    color: var(--muted);
+  }
+  #user-input:focus-visible {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.15), 0 6px 12px rgba(0,0,0,0.06);
+    transform: translateY(-1px);
   }
   
   button {
-    background-color: #4CAF50;
-    color: white;
+    background: var(--primary);
+    color: var(--primary-contrast);
     border: none;
-    padding: 10px 15px;
-    border-radius: 5px;
+    padding: 12px 18px;
+    border-radius: 12px;
     cursor: pointer;
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    transition: transform .05s ease, box-shadow .15s ease, background-color .15s ease;
+  }
+  button:hover {
+    box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+    transform: translateY(-1px);
+  }
+  button:active {
+    transform: translateY(0);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.10);
+  }
+  button:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.25), 0 6px 12px rgba(0,0,0,0.10);
+  }
+  button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
   #loader {
   display: none; /* Hide by default */
@@ -93,8 +145,8 @@
   <h1>Mathematics Tutor</h1>
   <div id="chat-history"></div>
   <form id="chat-form">
-    <input type="text" id="user-input" placeholder="Enter your message">
-    <button type="submit">Send</button>
+    <textarea id="user-input" placeholder="Ask any Mathematics Question in Sinhala or English"></textarea>
+    <button type="submit">Ask</button>
   </form>
 </div>
 <div id="loader">
