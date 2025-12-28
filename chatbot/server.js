@@ -2,12 +2,16 @@
 // npm install @google/generative-ai express
 
 const express = require('express');
+const path = require('path');
 const { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } = require('@google/generative-ai');
 const dotenv = require('dotenv').config()
 
 const app = express();
 const port = process.env.PORT || 3000;
 app.use(express.json());
+// Serve static files from chatbot directory and KaTeX assets from node_modules
+app.use(express.static(__dirname));
+app.use('/katex', express.static(path.join(__dirname, 'node_modules', 'katex', 'dist')));
 // Prefer a supported free Gemini model; allow override via env
 const MODEL_NAME = process.env.MODEL_NAME || "gemini-1.5-flash-latest";
 const API_KEY = process.env.API_KEY;
@@ -107,6 +111,42 @@ async function fetchAvailableModels() {
   return dedup;
 }
 
+function formatMathResponse(text) {
+  if (!text || typeof text !== 'string') return '';
+  // Tokenize math segments to avoid modifying inside $...$ or $$...$$
+  const mathRegex = /(\$\$[^$]*\$\$|\$[^$]*\$)/g;
+  const tokens = [];
+  let last = 0;
+  let match;
+  while ((match = mathRegex.exec(text)) !== null) {
+    if (match.index > last) {
+      tokens.push({ type: 'text', value: text.slice(last, match.index) });
+    }
+    tokens.push({ type: 'math', value: match[0] });
+    last = mathRegex.lastIndex;
+  }
+  if (last < text.length) {
+    tokens.push({ type: 'text', value: text.slice(last) });
+  }
+
+  const processText = (s) => {
+    // Normalize newlines
+    s = s.replace(/\r\n/g, '\n');
+    // Convert markdown bold **text** to <strong>text</strong>
+    s = s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    // Make common headings bold (without asterisks)
+    s = s.replace(/(^|\n)\s*Solution:\s*/gi, '$1<strong>Solution</strong>\n');
+    s = s.replace(/(^|\n)\s*(Step\s*\d+:)/gi, (m, p1, p2) => `${p1}<strong>${p2}</strong>`);
+    s = s.replace(/(^|\n)\s*(The Core Formula)\s*(:)?/gi, (m, p1, title, colon) => `${p1}<strong>${title}</strong>${colon ? ':' : ''}\n`);
+    // Collapse excessive blank lines
+    s = s.replace(/\n{3,}/g, '\n\n');
+    return s;
+  };
+
+  const formatted = tokens.map(t => (t.type === 'text' ? processText(t.value) : t.value)).join('');
+  return formatted.trim();
+}
+
 async function runChat(userInput, preferredModel = MODEL_NAME) {
   const genAI = new GoogleGenerativeAI(API_KEY);
   let modelCandidates = [
@@ -136,7 +176,7 @@ async function runChat(userInput, preferredModel = MODEL_NAME) {
     temperature: isMathLike(userInput) ? 0 : 0.9,
     topK: 1,
     topP: 1,
-    maxOutputTokens: 1000,
+    maxOutputTokens: 2000,
   };
 
   const safetySettings = [
@@ -153,7 +193,7 @@ async function runChat(userInput, preferredModel = MODEL_NAME) {
     history: [
       {
         role: "user",
-        parts: [{ text: "You are a helpful assistant. Answer user questions clearly and concisely. For math, show correct steps and prefer exact forms when reasonable." }],
+        parts: [{ text: "You are a helpful math tutor. Answer user questions clearly and concisely. For math problems:\n1. Show all steps in order\n2. Separate each major step on a new line\n3. Use proper mathematical notation\n4. For equations, put each significant equation on its own line\n5. List final solutions clearly at the end\nFormat your response for readability with proper spacing between steps." }],
       },
     ],
   });
@@ -165,7 +205,13 @@ async function runChat(userInput, preferredModel = MODEL_NAME) {
       const chat = startChatWith(model);
       const result = await chat.sendMessage(userInput);
       const response = result.response;
-      return response.text();
+      const rawText = response.text();
+      
+      // Apply formatting if it looks like a math problem
+      if (isMathLike(userInput)) {
+        return formatMathResponse(rawText);
+      }
+      return rawText;
     } catch (err) {
       lastErr = err;
       const msg = String(err && err.message ? err.message : err);

@@ -3,6 +3,10 @@
 <head>
 <title>Chatbot</title>
 <style>
+  html, body {
+    height: 100%;
+    overflow: hidden; /* Prevent page-level scrolling */
+  }
   body {
     font-family: sans-serif;
     display: flex;
@@ -10,6 +14,7 @@
     align-items: center;
     min-height: 100vh;
     background-color: #f0f0f0;
+    /* Keep the page static, no extra height growth */
   }
   
   #chat-container {
@@ -17,7 +22,11 @@
     border-radius: 10px;
     padding: 20px;
     box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
-    width: 600px;
+    width: 1000px;
+    max-height: 90vh; /* Constrain container to viewport */
+    overflow-y: auto; /* Allow container to scroll */
+    display: flex;
+    flex-direction: column;
   }
   
   h1 {
@@ -26,8 +35,10 @@
   }
   
   #chat-history {
-    height: 300px;
-    overflow-y: scroll;
+    /* Let chat history fill remaining space inside container */
+    flex: 1 1 auto;
+    min-height: 20vh; /* required for flex children to enable scrolling */
+    overflow-y: auto;
   }
   
   .user-message {
@@ -36,6 +47,7 @@
     background-color: #f0f0f0;
     border-radius: 10px;
     margin-bottom: 5px;
+    white-space: pre-wrap; /* preserve newlines */
   }
   
   .bot-message {
@@ -44,6 +56,7 @@
     background-color: #e0f0e0;
     border-radius: 10px;
     margin-bottom: 5px;
+    white-space: pre-wrap; /* preserve newlines */
   }
   
   form {
@@ -87,6 +100,10 @@
 <div id="loader">
   <img src="loader.gif" width="150px" alt="Loading...">
 </div>
+  <!-- KaTeX CSS & JS for rendering LaTeX math (served locally) -->
+  <link rel="stylesheet" href="/katex/katex.min.css">
+  <script defer src="/katex/katex.min.js"></script>
+  <script defer src="/katex/contrib/auto-render.min.js"></script>
   <script>
     const chatHistory = document.getElementById('chat-history');
     const userInput = document.getElementById('user-input');
@@ -109,9 +126,20 @@
         console.log(data)
         const botMessage = data.response;
         console.log(botMessage)
-        // Add chat message to the chat history
+        // Add chat messages to the chat history
         chatHistory.innerHTML += `<div class="user-message">${userMessage}</div>`;
         chatHistory.innerHTML += `<div class="bot-message">${botMessage}</div>`;
+
+        // Render LaTeX math in the chat history
+        if (typeof renderMathInElement === 'function') {
+          renderMathInElement(chatHistory, {
+            delimiters: [
+              { left: '$$', right: '$$', display: true },
+              { left: '$', right: '$', display: false },
+            ],
+            throwOnError: false,
+          });
+        }
 
         // Scroll to the bottom of the chat history
         chatHistory.scrollTop = chatHistory.scrollHeight;
