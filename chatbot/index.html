@@ -3,18 +3,37 @@
 <head>
 <title>Chatbot</title>
 <style>
-  :root {
-    --primary-rgb: 56, 97, 255; /* calm blue */
-    --primary: rgb(var(--primary-rgb));
-    --primary-contrast: #ffffff;
-    --accent-rgb: 34, 197, 94; /* friendly green */
-    --accent: rgb(var(--accent-rgb));
-    --surface: #ffffff;
-    --border: #e2e8f0; /* slate-200 */
-    --text: #1f2937;   /* slate-800 */
-    --muted: #64748b;  /* slate-500 */
-  }
-  html, body {
+    :root {
+      --primary-rgb: 56, 97, 255; /* calm blue */
+      --primary: rgb(var(--primary-rgb));
+      --primary-contrast: #ffffff;
+      --accent-rgb: 34, 197, 94; /* friendly green */
+      --accent: rgb(var(--accent-rgb));
+      --surface: #ffffff;
+      --border: #e2e8f0; /* slate-200 */
+      --text: #1f2937;   /* slate-800 */
+      --muted: #64748b;  /* slate-500 */
+      --bg-page: #f0f0f0;
+      --bg-user-msg: #f0f0f0;
+      --bg-bot-msg: #e0f0e0;
+      --shadow-color: rgba(0, 0, 0, 0.1);
+    }
+
+    /* --- Dark Mode Variables --- */
+    body.dark-mode {
+      --primary-rgb: 96, 165, 250; /* blue-400 */
+      --primary-contrast: #111827;
+      --surface: #1f2937; /* gray-800 */
+      --border: #4b5563; /* gray-600 */
+      --text: #f9fafb;   /* gray-50 */
+      --muted: #9ca3af;  /* gray-400 */
+      --bg-page: #111827; /* gray-900 */
+      --bg-user-msg: #374151; /* gray-700 */
+      --bg-bot-msg: #164e63; /* cyan-800 */
+      --shadow-color: rgba(0, 0, 0, 0.3);
+    }
+
+    html, body {
     height: 100%;
     overflow: hidden; /* Prevent page-level scrolling */
   }
@@ -24,25 +43,36 @@
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-color: #f0f0f0;
+    background-color: var(--bg-page);
     /* Keep the page static, no extra height growth */
+    transition: background-color 0.3s ease;
   }
   
   #chat-container {
-    background-color: #fff;
+    background-color: var(--surface);
     border-radius: 10px;
     padding: 20px;
-    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0px 2px 5px var(--shadow-color);
     width: 1000px;
     max-height: 90vh; /* Constrain container to viewport */
     overflow-y: auto; /* Allow container to scroll */
     display: flex;
     flex-direction: column;
+    transition: background-color 0.3s ease;
   }
   
-  h1 {
-    text-align: center;
+  .header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 20px;
+  }
+
+  h1 {
+    flex-grow: 1;
+    text-align: center;
+    margin-bottom: 0;
+    color: var(--text);
   }
   
   #chat-history {
@@ -55,19 +85,21 @@
   .user-message {
     text-align: right;
     padding: 10px;
-    background-color: #f0f0f0;
+    background-color: var(--bg-user-msg);
     border-radius: 10px;
     margin-bottom: 5px;
     white-space: pre-wrap; /* preserve newlines */
+    color: var(--text);
   }
   
   .bot-message {
     text-align: left;
     padding: 10px;
-    background-color: #e0f0e0;
+    background-color: var(--bg-bot-msg);
     border-radius: 10px;
     margin-bottom: 5px;
     white-space: pre-wrap; /* preserve newlines */
+    color: var(--text);
   }
   
   form {
@@ -131,6 +163,26 @@
     opacity: 0.6;
     cursor: not-allowed;
   }
+
+  #dark-mode-toggle {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 1.2rem;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s, border-color 0.2s;
+    padding: 0;
+  }
+  #dark-mode-toggle:hover {
+    background-color: rgba(127, 127, 127, 0.1);
+  }
+
   #loader {
   display: none; /* Hide by default */
   position: absolute;
@@ -142,7 +194,10 @@
 </head>
 <body>
   <div id="chat-container">
-  <h1>Mathematics Tutor</h1>
+  <div class="header-container">
+    <h1>Mathematics Tutor</h1>
+    <button id="dark-mode-toggle" title="Toggle dark mode">🌙</button>
+  </div>
   <div id="chat-history"></div>
   <form id="chat-form">
     <textarea id="user-input" placeholder="Ask any Mathematics Question in Sinhala or English"></textarea>
@@ -160,6 +215,31 @@
     const chatHistory = document.getElementById('chat-history');
     const userInput = document.getElementById('user-input');
     const form = document.getElementById('chat-form');
+    const darkModeToggle = document.getElementById('dark-mode-toggle');
+
+    // --- Dark Mode Logic ---
+    const applyDarkMode = (isDark) => {
+      if (isDark) {
+        document.body.classList.add('dark-mode');
+        darkModeToggle.textContent = '🔆';
+      } else {
+        document.body.classList.remove('dark-mode');
+        darkModeToggle.textContent = '🌙';
+      }
+    };
+
+    darkModeToggle.addEventListener('click', () => {
+      const isDarkMode = document.body.classList.contains('dark-mode');
+      applyDarkMode(!isDarkMode);
+      localStorage.setItem('darkMode', !isDarkMode);
+    });
+
+    // Apply saved theme on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedMode = localStorage.getItem('darkMode') === 'true';
+      applyDarkMode(savedMode);
+    });
+    // --- End Dark Mode Logic ---
 
     async function sendMessage() {
       const userMessage = userInput.value.trim();
