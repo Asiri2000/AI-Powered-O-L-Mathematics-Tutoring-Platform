@@ -115,13 +115,13 @@ async function fetchAvailableModels() {
 
 function formatMathResponse(text) {
   if (!text || typeof text !== 'string') return '';
-  
+
   // Protect math ($...$, $$...$$) and code (`...`, ```...```) from formatting
   const protectRegex = /(\$\$[\s\S]*?\$\$|\$[^$]+\$|```[\s\S]*?```|`[^`]+`)/g;
   const parts = [];
   let last = 0;
   let m;
-  
+
   while ((m = protectRegex.exec(text)) !== null) {
     if (m.index > last) {
       parts.push({ type: 'text', value: text.slice(last, m.index) });
@@ -134,22 +134,27 @@ function formatMathResponse(text) {
   }
 
   const processText = (s) => {
-    s = s.replace(/\r\n/g, '\n');
-    
-    // Bold: **any text** → <strong>any text</strong>
-    // Match ** followed by at least one character (non-greedy) until closing **
-    // Allow any content between (including spaces, newlines, punctuation)
-    s = s.replace(/\*\*([\s\S]+?)\*\*/g, '<strong>$1</strong>');
-    
-    // Make common headings bold
-    s = s.replace(/(^|\n)\s*Solution:\s*/gi, '$1<strong>Solution</strong>\n');
-    s = s.replace(/(^|\n)\s*(Step\s*\d+:)/gi, (match, p1, p2) => `${p1}<strong>${p2}</strong>`);
-    s = s.replace(/(^|\n)\s*(The Core Formula)\s*(:)?/gi, (match, p1, title, colon) => `${p1}<strong>${title}</strong>${colon ? ':' : ''}\n`);
-    
-    // Collapse excessive blank lines
-    s = s.replace(/\n{3,}/g, '\n\n');
-    
-    return s;
+    let processed = s.replace(/\r\n/g, '\n');
+
+    // 1. Convert Markdown Headers (e.g., ### Heading) to bold.
+    // This looks for '###' at the start of a line, captures the text after it, and wraps it in <strong>.
+    processed = processed.replace(/^(###\s*)(.*)$/gm, '<strong>$2</strong>');
+
+    // 2. Convert Markdown Bold (**text**) to <strong>.
+    // This handles text that might span multiple lines.
+    processed = processed.replace(/\*\*([\s\S]+?)\*\*/g, '<strong>$1</strong>');
+
+    // 3. Make specific "Step X:" headings bold if they weren't already.
+    processed = processed.replace(/(^|\n)\s*(Step\s*\d+:)/gi, (match, p1, p2) => `${p1}<strong>${p2}</strong>`);
+
+    // 4. Clean up any remaining markers, just in case.
+    processed = processed.replace(/###/g, '');
+    processed = processed.replace(/\*\*/g, '');
+
+    // 5. Standardize spacing by collapsing excessive blank lines.
+    processed = processed.replace(/\n{3,}/g, '\n\n');
+
+    return processed;
   };
 
   const formatted = parts.map(p => (p.type === 'text' ? processText(p.value) : p.value)).join('');

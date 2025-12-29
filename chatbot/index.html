@@ -146,7 +146,7 @@
   <div id="chat-history"></div>
   <form id="chat-form">
     <textarea id="user-input" placeholder="Ask any Mathematics Question in Sinhala or English"></textarea>
-    <button type="submit">Ask</button>
+    <button type="submit">&nbsp; Ask &nbsp;</button>
   </form>
 </div>
 <div id="loader">
@@ -162,7 +162,16 @@
     const form = document.getElementById('chat-form');
 
     async function sendMessage() {
-      const userMessage = userInput.value;
+      const userMessage = userInput.value.trim();
+      
+      // Validate empty input
+      if (!userMessage) {
+        const emptyMessageResponse = "Please enter your mathematics question. I'm here and willing to help you! 😊";
+        chatHistory.innerHTML += `<div class="bot-message">${emptyMessageResponse}</div>`;
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+        return;
+      }
+      
       userInput.value = ''; // Clear input field
       console.log(userMessage)
       try {
@@ -204,10 +213,16 @@
     form.addEventListener('submit', (event) => {
       event.preventDefault(); // Prevent form submission
       const loader = document.getElementById('loader');
-      loader.style.display = 'block'; // Show the loader
+      const userMessage = userInput.value.trim();
+      
+      // Only show loader if message is not empty
+      if (userMessage) {
+        loader.style.display = 'block'; // Show the loader
+      }
+      
       sendMessage().finally(() => {
-      loader.style.display = 'none'; // Hide the loader after the message is sent
-    });;
+        loader.style.display = 'none'; // Hide the loader after the message is sent
+      });
     });
   </script>
 </body>
