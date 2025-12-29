@@ -15,6 +15,8 @@ app.use('/katex', express.static(path.join(__dirname, 'node_modules', 'katex', '
 // Prefer a supported free Gemini model; allow override via env
 const MODEL_NAME = process.env.MODEL_NAME || "gemini-1.5-flash-latest";
 const API_KEY = process.env.API_KEY;
+// New: configurable output tokens (increase default)
+const MAX_OUTPUT_TOKENS = Math.max(1, Number(process.env.MAX_OUTPUT_TOKENS) || 8192);
 let MODEL_CACHE = { models: [], fetchedAt: 0 };
 const MATH_SOLVER_ENABLED = process.env.MATH_SOLVER_ENABLED !== 'false';
 
@@ -113,48 +115,66 @@ async function fetchAvailableModels() {
 
 function formatMathResponse(text) {
   if (!text || typeof text !== 'string') return '';
-  // Tokenize math segments to avoid modifying inside $...$ or $$...$$
-  const mathRegex = /(\$\$[^$]*\$\$|\$[^$]*\$)/g;
-  const tokens = [];
+  
+  // Protect math ($...$, $$...$$) and code (`...`, ```...```) from formatting
+  const protectRegex = /(\$\$[\s\S]*?\$\$|\$[^$]+\$|```[\s\S]*?```|`[^`]+`)/g;
+  const parts = [];
   let last = 0;
-  let match;
-  while ((match = mathRegex.exec(text)) !== null) {
-    if (match.index > last) {
-      tokens.push({ type: 'text', value: text.slice(last, match.index) });
+  let m;
+  
+  while ((m = protectRegex.exec(text)) !== null) {
+    if (m.index > last) {
+      parts.push({ type: 'text', value: text.slice(last, m.index) });
     }
-    tokens.push({ type: 'math', value: match[0] });
-    last = mathRegex.lastIndex;
+    parts.push({ type: 'protected', value: m[0] });
+    last = protectRegex.lastIndex;
   }
   if (last < text.length) {
-    tokens.push({ type: 'text', value: text.slice(last) });
+    parts.push({ type: 'text', value: text.slice(last) });
   }
 
   const processText = (s) => {
-    // Normalize newlines
     s = s.replace(/\r\n/g, '\n');
-    // Convert markdown bold **text** to <strong>text</strong>
-    s = s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-    // Make common headings bold (without asterisks)
+    
+    // Bold: **any text** → <strong>any text</strong>
+    // Match ** followed by at least one character (non-greedy) until closing **
+    // Allow any content between (including spaces, newlines, punctuation)
+    s = s.replace(/\*\*([\s\S]+?)\*\*/g, '<strong>$1</strong>');
+    
+    // Make common headings bold
     s = s.replace(/(^|\n)\s*Solution:\s*/gi, '$1<strong>Solution</strong>\n');
-    s = s.replace(/(^|\n)\s*(Step\s*\d+:)/gi, (m, p1, p2) => `${p1}<strong>${p2}</strong>`);
-    s = s.replace(/(^|\n)\s*(The Core Formula)\s*(:)?/gi, (m, p1, title, colon) => `${p1}<strong>${title}</strong>${colon ? ':' : ''}\n`);
+    s = s.replace(/(^|\n)\s*(Step\s*\d+:)/gi, (match, p1, p2) => `${p1}<strong>${p2}</strong>`);
+    s = s.replace(/(^|\n)\s*(The Core Formula)\s*(:)?/gi, (match, p1, title, colon) => `${p1}<strong>${title}</strong>${colon ? ':' : ''}\n`);
+    
     // Collapse excessive blank lines
     s = s.replace(/\n{3,}/g, '\n\n');
+    
     return s;
   };
 
-  const formatted = tokens.map(t => (t.type === 'text' ? processText(t.value) : t.value)).join('');
+  const formatted = parts.map(p => (p.type === 'text' ? processText(p.value) : p.value)).join('');
   return formatted.trim();
+}
+
+function getFinishReason(resp) {
+  try {
+    const c = resp?.candidates?.[0];
+    // Library may use different casing/keys; handle both
+    return c?.finishReason || c?.finish_reason || null;
+  } catch {
+    return null;
+  }
 }
 
 async function runChat(userInput, preferredModel = MODEL_NAME) {
   const genAI = new GoogleGenerativeAI(API_KEY);
   let modelCandidates = [
+    // Prefer Pro first for longer, more complete outputs
     preferredModel,
-    "gemini-1.5-flash-latest",
-    "gemini-1.5-flash",
     "gemini-1.5-pro-latest",
     "gemini-1.5-pro",
+    "gemini-1.5-flash-latest",
+    "gemini-1.5-flash",
     "gemini-1.0-pro",
   ].filter((m, idx, arr) => m && arr.indexOf(m) === idx);
   // If we have cached models, prefer those that support generateContent
@@ -176,7 +196,8 @@ async function runChat(userInput, preferredModel = MODEL_NAME) {
     temperature: isMathLike(userInput) ? 0 : 0.9,
     topK: 1,
     topP: 1,
-    maxOutputTokens: 2000,
+    // New: larger budget for longer answers
+    maxOutputTokens: MAX_OUTPUT_TOKENS,
   };
 
   const safetySettings = [
@@ -193,7 +214,7 @@ async function runChat(userInput, preferredModel = MODEL_NAME) {
     history: [
       {
         role: "user",
-        parts: [{ text: "You are a helpful math tutor. Answer user questions clearly and concisely. For math problems:\n1. Show all steps in order\n2. Separate each major step on a new line\n3. Use proper mathematical notation\n4. For equations, put each significant equation on its own line\n5. List final solutions clearly at the end\nFormat your response for readability with proper spacing between steps." }],
+        parts: [{ text: "You are a helpful math tutor. Answer user questions clearly and concisely. For math problems:\n1. Show all steps in order\n2. Separate each major step on a new line\n3. Use proper mathematical notation\n4. For equations, put each significant equation on its own line\n5. List final solutions clearly at the end\nIf the solution is long, continue in additional messages until complete.\nFormat your response for readability with proper spacing between steps." }],
       },
     ],
   });
@@ -203,24 +224,34 @@ async function runChat(userInput, preferredModel = MODEL_NAME) {
       console.log(`[gemini] trying model: ${m}`);
       const model = genAI.getGenerativeModel({ model: m });
       const chat = startChatWith(model);
-      const result = await chat.sendMessage(userInput);
-      const response = result.response;
-      const rawText = response.text();
-      
-      // Apply formatting if it looks like a math problem
-      if (isMathLike(userInput)) {
-        return formatMathResponse(rawText);
+
+      // First message
+      const first = await chat.sendMessage(userInput);
+      let aggregated = first.response.text();
+      let finish = getFinishReason(first.response);
+      console.log('finishReason:', finish);
+
+      // Auto-continue if the model stopped due to token limit
+      let continues = 0;
+      const MAX_CONTINUES = 4; // guard to avoid infinite loops
+      while (finish && String(finish).toUpperCase().includes('MAX') && continues < MAX_CONTINUES) {
+        const cont = await chat.sendMessage("Continue the solution from where you stopped. Do not repeat previous steps.");
+        aggregated += "\n" + cont.response.text();
+        finish = getFinishReason(cont.response);
+        continues++;
       }
-      return rawText;
+
+      if (isMathLike(userInput)) {
+        return formatMathResponse(aggregated);
+      }
+      return aggregated;
     } catch (err) {
       lastErr = err;
       const msg = String(err && err.message ? err.message : err);
       const isModelNotFound = msg.includes("404 Not Found") || msg.includes("is not found") || msg.includes("not supported for generateContent");
       if (!isModelNotFound) {
-        // Non-model error; stop trying further
         break;
       }
-      // Else continue to next candidate
     }
   }
   throw lastErr || new Error("No working Gemini model found");
