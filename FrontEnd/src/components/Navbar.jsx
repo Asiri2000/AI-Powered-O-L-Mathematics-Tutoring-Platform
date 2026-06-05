@@ -109,13 +109,13 @@ const Navbar = () => {
             // --- IF LOGGED OUT: Show Login + Sign Up ---
             <>
               <button 
-                onClick={() => navigate('/login')}
+                onClick={() => navigate('/auth/login')}
                 className="flex items-center gap-2 px-4 py-2 text-gray-600 font-medium hover:text-green-700 transition-colors">
                 <LogIn className="w-4 h-4" />
                 Login
               </button>
               <button 
-                onClick={() => navigate('/signup')}
+                onClick={() => navigate('/auth/register')}
                 className="flex items-center gap-2 px-4 py-2 bg-green-100 text-green-800 font-semibold rounded-lg hover:bg-green-200 transition-colors border border-green-200">
                 <UserPlus className="w-4 h-4" />
                 Sign Up

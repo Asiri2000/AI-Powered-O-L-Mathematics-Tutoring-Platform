@@ -1,22 +1,18 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { registerUser } from '../../api';
+import { registerUser } from '../../api'; // Make sure this path is correct
+
 const Signin = () => {
   const [formData, setFormData] = useState({
-    studentName: '',
     username: '',
+    email: '',
     password: '',
-    confirmPassword: '',
-    grade: '',
-    school: ''
+    confirmPassword: ''
   });
   
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false); 
   const navigate = useNavigate();
-
-  const schools = ['Kg/Mw/Halpitiya K.V', 'Kg/Mw/Parakrama M.V', 'Kg/Puwakdeniya Model School'];
-  const grades = ['10', '11'];
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -24,7 +20,8 @@ const Signin = () => {
       ...formData,
       [name]: value
     });
-    // Clear error for this field
+    
+    // Clear error for this field when user starts typing
     if (errors[name]) {
       setErrors({
         ...errors,
@@ -36,16 +33,21 @@ const Signin = () => {
   const validateForm = () => {
     const newErrors = {};
     
-    if (!formData.studentName.trim()) {
-      newErrors.studentName = 'Student name is required';
-    }
-    
+    // Username validation
     if (!formData.username.trim()) {
       newErrors.username = 'Username is required';
     } else if (formData.username.length < 3) {
       newErrors.username = 'Username must be at least 3 characters';
     }
     
+    // Email validation
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+    
+    // Password validation
     if (!formData.password) {
       newErrors.password = 'Password is required';
     } else if (formData.password.length < 6) {
@@ -56,28 +58,34 @@ const Signin = () => {
       newErrors.confirmPassword = 'Passwords do not match';
     }
     
-    
     return newErrors;
   };
 
-  const handleSubmit = async (e) => { // <--- Make async
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validateForm();
     
     if (Object.keys(validationErrors).length === 0) {
       setIsLoading(true);
       try {
-        // 1. Call the Backend
-        await registerUser(formData);
+        // Strip out confirmPassword before sending to backend
+        const payload = {
+          username: formData.username,
+          email: formData.email,
+          password: formData.password
+        };
+
+        // Call the Backend
+        await registerUser(payload);
         
-        // 2. Success!
+        // Success!
         alert('Account created successfully! Please login.');
-        navigate('/login');
+        navigate('/auth/login');
       } catch (err) {
-        // 3. Handle Backend Errors (e.g. "Username already taken")
         console.error(err);
+        // Display backend error (e.g., "Email already in use")
         setErrors({ 
-          username: err.detail || 'Registration failed. Please try again.' 
+          username: err.detail || err.message || 'Registration failed. Please try again.' 
         });
       } finally {
         setIsLoading(false);
@@ -90,6 +98,7 @@ const Signin = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 to-green-50 p-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-8 border border-emerald-100">
+        
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-emerald-100 rounded-full mb-4">
             <svg className="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -102,25 +111,8 @@ const Signin = () => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-emerald-800 mb-2">
-                Student Name *
-              </label>
-              <input
-                type="text"
-                name="studentName"
-                value={formData.studentName}
-                onChange={handleChange}
-                className={`w-full px-4 py-3 rounded-lg border ${
-                  errors.studentName ? 'border-red-500' : 'border-emerald-200'
-                } focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition duration-200`}
-                placeholder="Enter your full name"
-              />
-              {errors.studentName && (
-                <p className="text-red-500 text-sm mt-1">{errors.studentName}</p>
-              )}
-            </div>
-
+            
+            {/* Username Field */}
             <div>
               <label className="block text-sm font-medium text-emerald-800 mb-2">
                 Username *
@@ -139,9 +131,31 @@ const Signin = () => {
                 <p className="text-red-500 text-sm mt-1">{errors.username}</p>
               )}
             </div>
+
+            {/* Email Field */}
+            <div>
+              <label className="block text-sm font-medium text-emerald-800 mb-2">
+                Email Address *
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                className={`w-full px-4 py-3 rounded-lg border ${
+                  errors.email ? 'border-red-500' : 'border-emerald-200'
+                } focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition duration-200`}
+                placeholder="Enter your email"
+              />
+              {errors.email && (
+                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+              )}
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            {/* Password Field */}
             <div>
               <label className="block text-sm font-medium text-emerald-800 mb-2">
                 Password *
@@ -161,6 +175,7 @@ const Signin = () => {
               )}
             </div>
 
+            {/* Confirm Password Field */}
             <div>
               <label className="block text-sm font-medium text-emerald-800 mb-2">
                 Re-enter Password *
@@ -181,60 +196,12 @@ const Signin = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-emerald-800 mb-2">
-                Select Grade *
-              </label>
-              <div className="flex space-x-4">
-                {grades.map((grade) => (
-                  <label key={grade} className="flex items-center">
-                    <input
-                      type="radio"
-                      name="grade"
-                      value={grade}
-                      checked={formData.grade === grade}
-                      onChange={handleChange}
-                      className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-emerald-300"
-                    />
-                    <span className="ml-2 text-emerald-700">Grade {grade}</span>
-                  </label>
-                ))}
-              </div>
-              {errors.grade && (
-                <p className="text-red-500 text-sm mt-1">{errors.grade}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-emerald-800 mb-2">
-                Select School *
-              </label>
-              <select
-                name="school"
-                value={formData.school}
-                onChange={handleChange}
-                className={`w-full px-4 py-3 rounded-lg border ${
-                  errors.school ? 'border-red-500' : 'border-emerald-200'
-                } focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition duration-200`}
-              >
-                <option value="">Choose your school</option>
-                {schools.map((school) => (
-                  <option key={school} value={school}>
-                    {school}
-                  </option>
-                ))}
-              </select>
-              {errors.school && (
-                <p className="text-red-500 text-sm mt-1">{errors.school}</p>
-              )}
-            </div>
-          </div>
-
+          {/* Terms Checkbox */}
           <div className="flex items-center">
             <input
               type="checkbox"
               id="terms"
+              required
               className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-emerald-300 rounded"
             />
             <label htmlFor="terms" className="ml-2 text-sm text-emerald-700">
@@ -249,11 +216,15 @@ const Signin = () => {
             </label>
           </div>
 
+          {/* Submit Button */}
           <button
             type="submit"
-            className="w-full bg-gradient-to-r from-emerald-600 to-green-600 text-white font-semibold py-3 px-4 rounded-lg hover:from-emerald-700 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition duration-200 transform hover:-translate-y-0.5"
+            disabled={isLoading}
+            className={`w-full bg-gradient-to-r from-emerald-600 to-green-600 text-white font-semibold py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition duration-200 transform hover:-translate-y-0.5 ${
+              isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:from-emerald-700 hover:to-green-700'
+            }`}
           >
-            Create Account
+            {isLoading ? 'Creating Account...' : 'Create Account'}
           </button>
 
           <div className="text-center">

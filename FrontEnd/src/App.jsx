@@ -25,8 +25,8 @@ function App() {
           <Route path="/generator" element={<QuestionGenerator />} />
           <Route path="/companion" element={<LearningCompanion />} />
           <Route path="/performance" element={<Performance/>} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signin />} />
+          <Route path="/auth/login" element={<Login />} />
+          <Route path="/auth/register" element={<Signin />} />
           <Route path="/admin/users" element={<UserDetails />} />
           <Route path="/admin/add-content" element={<AddContent />} />
           <Route path="/admin" element={<AdminPage />} />
