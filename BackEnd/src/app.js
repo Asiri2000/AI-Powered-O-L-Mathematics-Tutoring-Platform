@@ -12,6 +12,7 @@ const quizRoutes = require('./routes/quizRoutes');
 const analyticsRoutes = require('./routes/analyticsRoutes');
 const diagnosisRoutes = require('./routes/diagnosisRoutes');
 const dashboardRoutes = require("./routes/dashboardRoutes");
+const lessonRoutes = require('./routes/lessonRoutes');
 
 const app = express();
 
@@ -29,6 +30,7 @@ app.use('/api/quiz', quizRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/diagnosis', diagnosisRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use('/api/lessons', lessonRoutes); // Adjust prefix if your React API expects something different
 
 // Error handling middleware
 app.use((err, req, res, next) => {

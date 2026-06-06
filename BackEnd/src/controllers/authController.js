@@ -38,8 +38,12 @@ exports.login = async (req, res) => {
 
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-    res.json({ token });
-  } catch (error) {
+// Now we send both the token AND the user's role back to React
+res.json({ 
+  token, 
+  user_role: user.user_role,
+  username: user.username 
+});  } catch (error) {
     console.error("Login Error:", error);
     res.status(500).json({ message: "Internal server error during login", error: error.message });
   }

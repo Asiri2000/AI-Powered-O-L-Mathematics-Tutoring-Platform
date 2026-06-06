@@ -23,29 +23,49 @@ export const loginUser = async (credentials) => {
   }
 };
 
+// Add this to your api.js file
 export const getAllUsers = async () => {
-  const token = sessionStorage.getItem('accessToken');
-  const response = await axios.get(`${API_URL}/users/`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  return response.data;
+  try {
+    const token = sessionStorage.getItem('accessToken'); 
+    
+    const response = await axios.get(`${API_URL}/users`, {
+      headers: {
+        Authorization: `Bearer ${token}` // This proves you are a logged-in admin!
+      }
+    });
+    
+    return response.data;
+  } catch (error) {
+    throw error.response ? error.response.data : new Error('Network Error');
+  }
 };
 
-export const updateUserRole = async (userId, newRole) => {
-  const token = sessionStorage.getItem('accessToken');
-  const response = await axios.put(
-    `${API_URL}/users/${userId}/role`, 
-    { user_role: newRole }, // Body
-    { headers: { Authorization: `Bearer ${token}` } } // Headers
-  );
-  return response.data;
+// Update user role
+export const updateUserRole = async (userId, role) => {
+  try {
+    const token = sessionStorage.getItem('accessToken');
+    // We send the new role in the body, and the token in the headers
+    const response = await axios.put(`${API_URL}/users/${userId}/role`, 
+      { user_role: role }, 
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    return response.data;
+  } catch (error) {
+    throw error.response ? error.response.data : new Error('Network Error');
+  }
 };
 
+// Delete user
 export const deleteUser = async (userId) => {
-  const token = sessionStorage.getItem('accessToken');
-  await axios.delete(`${API_URL}/users/${userId}`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
+  try {
+    const token = sessionStorage.getItem('accessToken');
+    const response = await axios.delete(`${API_URL}/users/${userId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response ? error.response.data : new Error('Network Error');
+  }
 };
 
 export const getCurrentUser = async () => {
@@ -54,4 +74,29 @@ export const getCurrentUser = async () => {
     headers: { Authorization: `Bearer ${token}` }
   });
   return response.data;
+};
+
+// Example of how your api.js should look for the lessons now:
+
+// Fetch all lessons
+export const getAllLessons = async () => {
+  try {
+    // Make sure this points to your Node.js endpoint!
+    const response = await axios.get(`${API_URL}/lessons`); 
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching lessons:", error);
+    return []; // Return empty array so map() doesn't crash
+  }
+};
+
+// Fetch specific lesson content
+export const getLessonContent = async (lessonId) => {
+  try {
+    const response = await axios.get(`${API_URL}/lessons/${lessonId}/content`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching lesson content:", error);
+    return [];
+  }
 };

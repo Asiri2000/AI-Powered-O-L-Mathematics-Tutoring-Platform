@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios'; // Or import your configured api instance if you have one
-import LearningSlide from '../../components/slides/LearningSlide';
+import { getLessonContent } from '../../api';import LearningSlide from '../../components/slides/LearningSlide';
 import CelebrationOverlay from '../../components/CelebrationOverlay';
 import { useParams, useNavigate } from 'react-router-dom';
 
@@ -12,22 +11,25 @@ export default function LessonCompanion() {
   const [showCelebration, setShowCelebration] = useState(false);
     const { id } = useParams(); // <--- READ ID FROM URL (e.g., /lesson/5 -> id=5)
   const navigate = useNavigate();
-  // 1. FETCH DATA FROM BACKEND
+  
   useEffect(() => {
     const fetchLesson = async () => {
       try {
-        // NOTE: Ensure your backend is running on port 8000
-        // We are fetching Lesson ID 1. Change '1' to dynamic ID later if needed.
-        const response = await axios.get(`http://127.0.0.1:8000/lessons/${id}/content`);
-        setSteps(response.data);
+        // 2. Use your API function here and pass it the 'id' from the URL!
+        const data = await getLessonContent(id);
+        
+        setSteps(data);
         setLoading(false);
       } catch (error) {
         console.error("Error loading lesson:", error);
         setLoading(false);
       }
     };
-    fetchLesson();
-  }, []);
+    
+    if (id) {
+      fetchLesson();
+    }
+  }, [id]); // Add 'id' to the dependency array so React knows to reload if the URL changes
 
   // 2. LOGIC FOR MOVING TO NEXT SLIDE
   const handleNext = (wasCorrect) => {

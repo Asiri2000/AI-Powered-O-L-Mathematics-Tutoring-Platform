@@ -37,14 +37,16 @@ const Login = () => {
       // Note: Adjust 'response.token' based on exactly what your backend sends back
       sessionStorage.setItem('accessToken', response.token); 
       sessionStorage.setItem('username', response.user?.username || response.username || 'Student');
-      sessionStorage.setItem('user_role', response.user?.role || response.role || 'user');
-
+      sessionStorage.setItem('user_role', response.user_role); // This now gets the real role!
       // 3. Tell the Navbar to update immediately without refreshing the page
       window.dispatchEvent(new Event("authChange"));
       
       // 4. Send them to the homepage
-      navigate('/');
-      
+      if (response.user_role === 'admin') {
+        navigate('/admin'); // Or whatever your admin route is in app.jsx
+      } else {
+        navigate('/'); // Regular students go to the main dashboard
+      }      
     } catch (err) {
       console.error(err);
       setError(err.message || 'Invalid email or password. Please try again.');

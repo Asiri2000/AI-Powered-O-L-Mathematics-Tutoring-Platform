@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-
+import { getAllLessons } from '../../api'; // Make sure the path to api.js is correct based on your folder structure!
 // Simple mapping for icons based on theme
 const themeIcons = {
   geometry: '📐',
@@ -20,12 +20,13 @@ export default function Lessons() {
   const navigate = useNavigate();
 
   // 1. Fetch Data
+  // 1. Fetch Data
   useEffect(() => {
     const fetchLessons = async () => {
       try {
-        // Ensure this URL matches your backend
-        const res = await axios.get('http://127.0.0.1:8000/lessons/');
-        setLessons(res.data);
+        // Use the function from api.js which correctly points to localhost:3000
+        const data = await getAllLessons(); 
+        setLessons(data);
       } catch (err) {
         console.error("Error fetching lessons:", err);
       } finally {

@@ -51,7 +51,7 @@ const Navbar = () => {
     // Notify other components
     window.dispatchEvent(new Event("authChange"));
     // Redirect
-    navigate('/login');
+    navigate('/auth/login');
   };
 
   const getLinkClasses = (isActive) => {

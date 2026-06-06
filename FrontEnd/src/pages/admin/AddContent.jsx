@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-
+import { getAllLessons } from '../../api'; // Import your fetch function
 export default function AddContent() {
   // 1. Config (Replace with your keys)
   const CLOUD_NAME = "dkbpbbb8k"; 
   const UPLOAD_PRESET = "research_unsigned"; 
-
+const API_URL = 'http://localhost:3000/api'; // Or import this from your api.js
   // 2. Form State
   const [lessons, setLessons] = useState([]);
   const [selectedLesson, setSelectedLesson] = useState("");
@@ -22,9 +22,15 @@ export default function AddContent() {
 
   // Load Lessons for Dropdown
   useEffect(() => {
-    axios.get('http://127.0.0.1:8000/lessons/')
-      .then(res => setLessons(res.data))
-      .catch(err => console.error(err));
+    const fetchDropdownLessons = async () => {
+      try {
+        const data = await getAllLessons(); // Use your new Node.js function!
+        setLessons(data);
+      } catch (error) {
+        console.error("Failed to load lessons for dropdown:", error);
+      }
+    };
+    fetchDropdownLessons();
   }, []);
 
   // 3. Image Upload Logic
@@ -70,7 +76,7 @@ export default function AddContent() {
 
     // C. Send to Backend
     try {
-      await axios.post('http://127.0.0.1:8000/lessons/add-step', payload);
+await axios.post(`${API_URL}/lessons/add-step`, payload);
       alert("Content Saved Successfully!");
       // Reset Form
       setTheoryText("");
@@ -97,7 +103,7 @@ export default function AddContent() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-8 bg-white shadow-lg rounded-xl mt-10">
+    <div className="max-w-2xl mx-auto p-8 bg-white shadow-lg rounded-xl mt-10 mb-10">
       <h2 className="text-2xl font-bold mb-6 text-gray-800">Add New Lesson Step</h2>
       
       <form onSubmit={handleSubmit} className="space-y-6">
