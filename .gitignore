@@ -1,0 +1,141 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+
+# Coverage directory used by testing tools
+coverage/
+*.lcov
+.nyc_output
+
+# IDE and Editor directories
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Temporary files
+*.tmp
+*.temp
+.cache
+
+# Debug files
+*.pid
+*.seed
+*.pid.lock
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional REPL history
+.node_repl_history
+
+# MongoDB data
+data/
+*.mongodb
+
+# Logs and databases
+*.sqlite
+*.db
+
+# Uploaded files (if any)
+uploads/
+
+# Test output
+test-results/
+
+venv/
+.venv/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Node
+node_modules/
+
+# Environment
+.env
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# ===============================
+# Python
+# ===============================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pytest_cache/
+*.py[cod]
+
+# Virtual environments
+venv/
+env/
+myenv/
+.venv/
+
+# ===============================
+# Agentic AI artifacts
+# ===============================
+agentic_AI_agents/**/__pycache__/
+agentic_AI_agents/**/*.pyc
+
+# FAISS / RAG indexes
+agentic_AI_agents/**/faiss_index/
+*.faiss
+*.pkl
+
+# ===============================
+# Node / React
+# ===============================
+node_modules/
+dist/
+build/
+
+# ===============================
+# OS / Editor
+# ===============================
+.DS_Store
+Thumbs.db
+.vscode/
+
