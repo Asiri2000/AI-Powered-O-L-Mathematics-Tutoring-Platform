@@ -60,4 +60,86 @@ export const getCurrentUser = async () => {
     headers: { Authorization: `Bearer ${token}` }
   });
   return response.data;
+<<<<<<< Updated upstream
 };
+=======
+};
+
+/**
+ * =========================
+ * 📊 ANALYTICS APIs
+ * =========================
+ */
+
+// CHAPTER ANALYTICS (LOGGED USER)
+export const getChapterAnalytics = async () => {
+  const response = await api.get("/analytics/chapters");
+  return response.data;
+};
+
+// OVERALL SUMMARY (LOGGED USER)
+export const getOverallSummary = async () => {
+  const response = await api.get("/analytics/summary");
+  return response.data;
+};
+
+/**
+ * =========================
+ * 🧠 DIAGNOSIS APIs
+ * =========================
+ */
+
+export const getErrorBreakdown = async () => {
+  const response = await api.get("/diagnosis/errors");
+  return response.data;
+};
+
+export const getWeakChapters = async () => {
+  const response = await api.get("/diagnosis/weaknesses");
+  return response.data;
+};
+
+/**
+ * =========================
+ * 📝 QUIZ APIs
+ * =========================
+ */
+
+// GENERATE QUIZ (JWT REQUIRED)
+export const generateQuiz = async (payload) => {
+  const response = await api.post("/quiz/generate", payload);
+  return response.data;
+};
+
+// ✅ SUBMIT QUIZ ATTEMPT (CRITICAL)
+export const submitQuizAttempt = async (payload) => {
+  const response = await api.post("/quiz/submit", payload);
+  return response.data;
+};
+
+// GENERATE MOCK EXAM
+export const generateMockExam = async (grade) => {
+  const response = await api.post("/mock-exam/generate", { grade });
+  return response.data;
+};
+
+/**
+ * =========================
+ * 🤖 MATHEMATICS TUTOR CHAT APIs
+ * =========================
+ */
+
+// SEND CHAT MESSAGE TO GEMINI AI
+export const sendChatMessage = async (userInput) => {
+  const response = await api.post("/chat", { userInput });
+  return response.data;
+};
+
+// GET AVAILABLE GEMINI MODELS
+export const getAvailableModels = async () => {
+  const response = await api.get("/chat/models");
+  return response.data;
+};
+
+export default api;
+>>>>>>> Stashed changes

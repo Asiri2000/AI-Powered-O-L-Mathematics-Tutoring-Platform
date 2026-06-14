@@ -14,6 +14,11 @@ import AdminPage from './pages/admin/adminPage';
 import AddContent from './pages/admin/AddContent';
 import LessonCompanion from './pages/user/lessonCompanion';
 import Lessons from './pages/user/lessons';
+<<<<<<< Updated upstream
+=======
+import MockExam from './pages/user/MockExam';
+import MathTutorChat from './pages/user/MathTutorChat';
+>>>>>>> Stashed changes
 function App() {
 
   return (
@@ -32,6 +37,11 @@ function App() {
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/lesson/:id" element={<LessonCompanion />} />
           <Route path="/lessons" element={<Lessons />} />
+<<<<<<< Updated upstream
+=======
+          <Route path="/mock-exam" element={<MockExam />} />
+          <Route path="/math-tutor" element={<MathTutorChat />} />
+>>>>>>> Stashed changes
         </Routes>
         <Footer />
     </Router>
