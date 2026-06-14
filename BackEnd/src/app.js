@@ -8,8 +8,6 @@ const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const questionRoutes = require('./routes/questionRoutes');
 const tutorRoutes = require('./routes/tutorRoutes');
-<<<<<<< Updated upstream
-=======
 const quizRoutes = require('./routes/quizRoutes');
 const analyticsRoutes = require('./routes/analyticsRoutes');
 const diagnosisRoutes = require('./routes/diagnosisRoutes');
@@ -20,7 +18,6 @@ const chatRoutes = require('./routes/chatRoutes');
 
 // Error handler
 const errorHandler = require('./middleware/errorHandler');
->>>>>>> Stashed changes
 
 const app = express();
 
@@ -34,8 +31,6 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/questions', questionRoutes);
 app.use('/api/tutors', tutorRoutes);
-<<<<<<< Updated upstream
-=======
 app.use('/api/quiz', quizRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/diagnosis', diagnosisRoutes);
@@ -43,7 +38,6 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/mock-exam', mockExamRoutes);
 app.use('/api/lessons', lessonRoutes);
 app.use('/api/chat', chatRoutes);
->>>>>>> Stashed changes
 
 // Error handling middleware
 app.use((err, req, res, next) => {

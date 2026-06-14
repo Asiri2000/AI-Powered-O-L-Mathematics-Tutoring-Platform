@@ -1,34 +1,27 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/database');
 
-const questionSchema = new mongoose.Schema({
-    questionText: {
-        type: String,
-        required: true,
-    },
-    options: {
-        type: [String],
-        required: true,
-    },
-    correctAnswer: {
-        type: String,
-        required: true,
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now,
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now,
-    },
+const Question = sequelize.define('Question', {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true,
+  },
+  questionText: {
+    type: DataTypes.TEXT,
+    allowNull: false,
+  },
+  options: {
+    type: DataTypes.ARRAY(DataTypes.STRING),
+    allowNull: false,
+  },
+  correctAnswer: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+}, {
+  tableName: 'questions',
+  timestamps: true,
 });
-
-// Middleware to update the updatedAt field before saving
-questionSchema.pre('save', function(next) {
-    this.updatedAt = Date.now();
-    next();
-});
-
-const Question = mongoose.model('Question', questionSchema);
 
 module.exports = Question;

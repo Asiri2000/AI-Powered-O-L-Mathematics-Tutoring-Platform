@@ -1,38 +1,53 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/database');
 
-const userSchema = new mongoose.Schema({
-    username: {
-        type: String,
-        required: true,
-        unique: true,
-        trim: true
-    },
-    email: {
-        type: String,
-        required: true,
-        unique: true,
-        trim: true,
-        lowercase: true
-    },
-    password: {
-        type: String,
-        required: true
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now
-    }
+const User = sequelize.define('User', {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true,
+  },
+
+  studentName: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+
+  username: {
+    type: DataTypes.STRING,
+    unique: true,
+    allowNull: false,
+  },
+
+  email: {
+    type: DataTypes.STRING,
+    unique: true,
+    allowNull: false,
+  },
+
+  password: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+
+  grade: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+
+  school: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+
+  role: {
+    type: DataTypes.STRING,
+    defaultValue: 'student',
+  },
+
+}, {
+  tableName: 'users',
+  timestamps: true,
 });
 
-// Method to update the updatedAt field
-userSchema.pre('save', function(next) {
-    this.updatedAt = Date.now();
-    next();
-});
-
-// Export the User model
-module.exports = mongoose.model('User', userSchema);
+module.exports = User;

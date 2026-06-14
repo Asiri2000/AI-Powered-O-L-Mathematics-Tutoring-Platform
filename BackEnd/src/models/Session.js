@@ -1,34 +1,19 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/database');
 
-const sessionSchema = new mongoose.Schema({
-    tutorId: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        ref: 'User'
-    },
-    studentId: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        ref: 'User'
-    },
-    subject: {
-        type: String,
-        required: true
-    },
-    sessionDate: {
-        type: Date,
-        required: true
-    },
-    duration: {
-        type: Number, // duration in minutes
-        required: true
-    },
-    notes: {
-        type: String,
-        default: ''
-    }
-}, { timestamps: true });
-
-const Session = mongoose.model('Session', sessionSchema);
+const Session = sequelize.define('Session', {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true,
+  },
+  subject: DataTypes.STRING,
+  sessionDate: DataTypes.DATE,
+  duration: DataTypes.INTEGER,
+  notes: DataTypes.TEXT,
+}, {
+  tableName: 'sessions',
+  timestamps: true,
+});
 
 module.exports = Session;

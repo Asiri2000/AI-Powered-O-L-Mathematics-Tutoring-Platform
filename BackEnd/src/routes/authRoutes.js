@@ -1,9 +1,24 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
+const {
+  validateUserRegistration,
+  validateUserLogin,
+  validateRequest,
+} = require('../middleware/validation');
 
-router.post('/register', authController.register);
-router.post('/login', authController.login);
-// Make sure the function name matches what's exported in authController
+router.post(
+  '/register',
+  validateUserRegistration,
+  validateRequest,
+  authController.register
+);
+
+router.post(
+  '/login',
+  validateUserLogin,
+  validateRequest,
+  authController.login
+);
 
 module.exports = router;
