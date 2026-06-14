@@ -1,0 +1,9 @@
+crewai
+crewai-tools
+fastapi
+uvicorn
+psycopg2-binary
+sqlalchemy
+requests
+python-dotenv
+pydantic
