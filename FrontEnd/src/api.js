@@ -3,10 +3,21 @@ import axios from 'axios';
 
 const API_URL = 'http://127.0.0.1:8000/api/v1';
 
+const api = axios.create({
+  baseURL: API_URL,
+});
+
+api.interceptors.request.use((config) => {
+  const token = sessionStorage.getItem('accessToken');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 export const registerUser = async (userData) => {
   try {
-    // We send JSON. Pydantic aliases handle 'studentName' -> 'full_name' mapping
-    const response = await axios.post(`${API_URL}/users/register`, userData);
+    const response = await api.post('/users/register', userData);
     return response.data;
   } catch (error) {
     throw error.response ? error.response.data : new Error('Network Error');
@@ -15,13 +26,12 @@ export const registerUser = async (userData) => {
 
 export const loginUser = async (credentials) => {
   try {
-    // FastAPI OAuth2 expects form-data, NOT JSON. We must convert it.
     const params = new URLSearchParams();
     params.append('username', credentials.username);
     params.append('password', credentials.password);
 
-    const response = await axios.post(`${API_URL}/users/login`, params, {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+    const response = await api.post('/users/login', params, {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     });
     return response.data;
   } catch (error) {
@@ -30,39 +40,25 @@ export const loginUser = async (credentials) => {
 };
 
 export const getAllUsers = async () => {
-  const token = sessionStorage.getItem('accessToken');
-  const response = await axios.get(`${API_URL}/users/`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
+  const response = await api.get('/users/');
   return response.data;
 };
 
 export const updateUserRole = async (userId, newRole) => {
-  const token = sessionStorage.getItem('accessToken');
-  const response = await axios.put(
-    `${API_URL}/users/${userId}/role`, 
-    { user_role: newRole }, // Body
-    { headers: { Authorization: `Bearer ${token}` } } // Headers
+  const response = await api.put(
+    `/users/${userId}/role`,
+    { user_role: newRole } // Body
   );
   return response.data;
 };
 
 export const deleteUser = async (userId) => {
-  const token = sessionStorage.getItem('accessToken');
-  await axios.delete(`${API_URL}/users/${userId}`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
+  await api.delete(`/users/${userId}`);
 };
 
 export const getCurrentUser = async () => {
-  const token = sessionStorage.getItem('accessToken');
-  const response = await axios.get(`${API_URL}/users/me`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
+  const response = await api.get('/users/me');
   return response.data;
-<<<<<<< Updated upstream
-};
-=======
 };
 
 /**
@@ -73,13 +69,13 @@ export const getCurrentUser = async () => {
 
 // CHAPTER ANALYTICS (LOGGED USER)
 export const getChapterAnalytics = async () => {
-  const response = await api.get("/analytics/chapters");
+  const response = await api.get('/analytics/chapters');
   return response.data;
 };
 
 // OVERALL SUMMARY (LOGGED USER)
 export const getOverallSummary = async () => {
-  const response = await api.get("/analytics/summary");
+  const response = await api.get('/analytics/summary');
   return response.data;
 };
 
@@ -90,12 +86,12 @@ export const getOverallSummary = async () => {
  */
 
 export const getErrorBreakdown = async () => {
-  const response = await api.get("/diagnosis/errors");
+  const response = await api.get('/diagnosis/errors');
   return response.data;
 };
 
 export const getWeakChapters = async () => {
-  const response = await api.get("/diagnosis/weaknesses");
+  const response = await api.get('/diagnosis/weaknesses');
   return response.data;
 };
 
@@ -107,19 +103,19 @@ export const getWeakChapters = async () => {
 
 // GENERATE QUIZ (JWT REQUIRED)
 export const generateQuiz = async (payload) => {
-  const response = await api.post("/quiz/generate", payload);
+  const response = await api.post('/quiz/generate', payload);
   return response.data;
 };
 
 // ✅ SUBMIT QUIZ ATTEMPT (CRITICAL)
 export const submitQuizAttempt = async (payload) => {
-  const response = await api.post("/quiz/submit", payload);
+  const response = await api.post('/quiz/submit', payload);
   return response.data;
 };
 
 // GENERATE MOCK EXAM
 export const generateMockExam = async (grade) => {
-  const response = await api.post("/mock-exam/generate", { grade });
+  const response = await api.post('/mock-exam/generate', { grade });
   return response.data;
 };
 
@@ -131,15 +127,14 @@ export const generateMockExam = async (grade) => {
 
 // SEND CHAT MESSAGE TO GEMINI AI
 export const sendChatMessage = async (userInput) => {
-  const response = await api.post("/chat", { userInput });
+  const response = await api.post('/chat', { userInput });
   return response.data;
 };
 
 // GET AVAILABLE GEMINI MODELS
 export const getAvailableModels = async () => {
-  const response = await api.get("/chat/models");
+  const response = await api.get('/chat/models');
   return response.data;
 };
 
 export default api;
->>>>>>> Stashed changes
