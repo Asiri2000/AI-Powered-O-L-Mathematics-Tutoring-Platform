@@ -1,15 +1,16 @@
 // node --version # Should be >= 18
-// npm install @google/generative-ai express
+// npm install @google/generative-ai express dotenv
 
 const express = require('express');
 const { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } = require('@google/generative-ai');
-const dotenv = require('dotenv').config()
+require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 3000;
 app.use(express.json());
-// Prefer a supported free Gemini model; allow override via env
-const MODEL_NAME = process.env.MODEL_NAME || "gemini-1.5-flash-latest";
+
+// Prefer a supported free/low-cost Gemini model ID; allow override via env
+const MODEL_NAME = process.env.MODEL_NAME || "gemini-2.5-flash";
 const API_KEY = process.env.API_KEY;
 let MODEL_CACHE = { models: [], fetchedAt: 0 };
 const MATH_SOLVER_ENABLED = process.env.MATH_SOLVER_ENABLED !== 'false';
@@ -33,7 +34,9 @@ function parseQuadratic(text) {
   const bMatch = lhs.match(/([+-]?\d*\.?\d*)x(?!\^)/);
   // constant: numbers not followed by x
   const cMatch = lhs.match(/([+-]?\d*\.?\d+)(?!x)/);
+  
   if (!aMatch || !bMatch || !cMatch) return null;
+  
   const parseCoeff = (m, defaultVal) => {
     if (!m) return defaultVal;
     let v = m[1];
@@ -42,9 +45,11 @@ function parseQuadratic(text) {
     }
     return parseFloat(v);
   };
+  
   const a = parseCoeff(aMatch, null);
   const b = parseCoeff(bMatch, 0);
   const c = parseCoeff(cMatch, 0);
+  
   if (a === null) return null;
   return { a, b, c };
 }
@@ -70,22 +75,23 @@ async function fetchAvailableModels() {
   if (!API_KEY) {
     throw new Error('Missing API_KEY in server environment');
   }
+  
+  // Use v1beta to ensure newer models like 2.5 Flash are reliably fetched
   const endpoints = [
-    `https://generativelanguage.googleapis.com/v1/models?key=${encodeURIComponent(API_KEY)}`,
     `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(API_KEY)}`,
   ];
+  
   const results = [];
   for (const url of endpoints) {
     try {
       const r = await fetch(url, { method: 'GET' });
-      if (!r.ok) {
-        continue;
-      }
+      if (!r.ok) continue;
+      
       const data = await r.json();
       const models = Array.isArray(data.models) ? data.models : [];
       for (const m of models) {
         results.push({
-          name: m.name,
+          name: m.name.replace('models/', ''), // Strip prefix for cleaner usage
           displayName: m.displayName,
           methods: m.supportedGenerationMethods || [],
         });
@@ -94,7 +100,8 @@ async function fetchAvailableModels() {
       // ignore endpoint errors, try next
     }
   }
-  // de-duplicate by name
+  
+  // De-duplicate by name
   const dedup = [];
   const seen = new Set();
   for (const m of results) {
@@ -109,27 +116,17 @@ async function fetchAvailableModels() {
 
 async function runChat(userInput, preferredModel = MODEL_NAME) {
   const genAI = new GoogleGenerativeAI(API_KEY);
+  
+  // Updated list of the most current and cost-effective active models
   let modelCandidates = [
     preferredModel,
-    "gemini-1.5-flash-latest",
-    "gemini-1.5-flash",
-    "gemini-1.5-pro-latest",
-    "gemini-1.5-pro",
-    "gemini-1.0-pro",
+    "gemini-2.5-flash",
+    "gemini-2.5-flash-lite",
+    "gemini-1.5-flash"
+
+   
   ].filter((m, idx, arr) => m && arr.indexOf(m) === idx);
-  // If we have cached models, prefer those that support generateContent
-  if (MODEL_CACHE.models && MODEL_CACHE.models.length) {
-    const allowed = new Set(
-      MODEL_CACHE.models
-        .filter(m => Array.isArray(m.methods) && m.methods.includes('generateContent'))
-        .map(m => m.name)
-    );
-    modelCandidates = modelCandidates.filter(m => allowed.has(m));
-    // If env-specified preferred model is not allowed, append the first allowed model
-    if (!modelCandidates.length && allowed.size) {
-      modelCandidates = Array.from(allowed);
-    }
-  }
+
   let lastErr;
 
   const generationConfig = {
@@ -143,49 +140,52 @@ async function runChat(userInput, preferredModel = MODEL_NAME) {
     {
       category: HarmCategory.HARM_CATEGORY_HARASSMENT,
       threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-    },
-    // ... other safety settings
+    }
   ];
-
-  const startChatWith = (model) => model.startChat({
-    generationConfig,
-    safetySettings,
-    history: [
-      {
-        role: "user",
-        parts: [{ text: "You are a helpful assistant. Answer user questions clearly and concisely. For math, show correct steps and prefer exact forms when reasonable." }],
-      },
-    ],
-  });
 
   for (const m of modelCandidates) {
     try {
       console.log(`[gemini] trying model: ${m}`);
-      const model = genAI.getGenerativeModel({ model: m });
-      const chat = startChatWith(model);
+      
+      // Pass the system prompt directly into the model initialization
+      const model = genAI.getGenerativeModel({ 
+        model: m,
+        systemInstruction: "You are a helpful assistant. Answer user questions clearly and concisely. For math, show correct steps and prefer exact forms when reasonable."
+      });
+      
+      const chat = model.startChat({
+        generationConfig,
+        safetySettings,
+        history: [] // Start with an empty history array to avoid role alternation errors
+      });
+      
       const result = await chat.sendMessage(userInput);
-      const response = result.response;
-      return response.text();
+      return result.response.text();
+      
     } catch (err) {
       lastErr = err;
       const msg = String(err && err.message ? err.message : err);
-      const isModelNotFound = msg.includes("404 Not Found") || msg.includes("is not found") || msg.includes("not supported for generateContent");
+      const isModelNotFound = msg.includes("404 Not Found") || msg.includes("is not found") || msg.includes("not supported");
+      
       if (!isModelNotFound) {
-        // Non-model error; stop trying further
+        // Non-model error (e.g. invalid API key, safety block); stop trying further
         break;
       }
-      // Else continue to next candidate
+      // Else continue to the next fallback candidate
     }
   }
-  throw lastErr || new Error("No working Gemini model found");
+  
+  throw lastErr || new Error("No working Gemini model found. Please check your API key and network.");
 }
 
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
 });
+
 app.get('/loader.gif', (req, res) => {
   res.sendFile(__dirname + '/loader.gif');
 });
+
 // Utility endpoint to list available models and supported methods
 app.get('/models', async (req, res) => {
   try {
@@ -196,13 +196,16 @@ app.get('/models', async (req, res) => {
     res.status(500).json({ error: 'Failed to list models', details: String(e.message || e) });
   }
 });
+
 app.post('/chat', async (req, res) => {
   try {
     const userInput = req.body?.userInput;
-    console.log('incoming /chat req', userInput)
+    console.log('Incoming /chat req:', userInput);
+    
     if (!userInput) {
       return res.status(400).json({ error: 'Invalid request body' });
     }
+    
     if (MATH_SOLVER_ENABLED) {
       const quad = parseQuadratic(userInput);
       if (quad) {
@@ -210,8 +213,10 @@ app.post('/chat', async (req, res) => {
         return res.json({ response: solution, source: 'deterministic' });
       }
     }
+    
     const response = await runChat(userInput);
     res.json({ response, source: 'model' });
+    
   } catch (error) {
     console.error('Error in chat endpoint:', error);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -220,6 +225,6 @@ app.post('/chat', async (req, res) => {
 
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
-  // Warm the model cache in background
+  // Warm the model cache in the background
   fetchAvailableModels().catch(() => {});
 });

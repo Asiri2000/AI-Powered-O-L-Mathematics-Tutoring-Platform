@@ -166,17 +166,16 @@ const Navbar = () => {
             )}
           </NavLink>
 
-          <a 
-            href="http://localhost:3000/" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 pb-3 pt-2 text-sm font-medium transition-all text-gray-500 hover:text-green-600"
-          >
-            <div className="p-1 rounded bg-gray-100">
-              <Bot className="w-4 h-4" />
-            </div>
-            Mathematics Tutor
-          </a>
+          <NavLink to="/math-tutor" className={({ isActive }) => getLinkClasses(isActive)}>
+            {({ isActive }) => (
+              <>
+                <div className={getIconClasses(isActive)}>
+                  <Bot className="w-4 h-4" />
+                </div>
+                Mathematics Tutor
+              </>
+            )}
+          </NavLink>
 
           <NavLink to="/lessons" className={({ isActive }) => getLinkClasses(isActive)}>
              {({ isActive }) => (

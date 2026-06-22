@@ -14,6 +14,7 @@ const diagnosisRoutes = require('./routes/diagnosisRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const mockExamRoutes = require('./routes/mockExamRoutes');
 const lessonRoutes = require('./routes/lessonRoutes');
+const chatRoutes = require('./routes/chatRoutes');
 
 // Error handler
 const errorHandler = require('./middleware/errorHandler');
@@ -51,6 +52,7 @@ app.use('/api/diagnosis', diagnosisRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/mock-exam', mockExamRoutes);
 app.use('/api/lessons', lessonRoutes);
+app.use('/api/chat', chatRoutes);
 
 /**
  * =========================

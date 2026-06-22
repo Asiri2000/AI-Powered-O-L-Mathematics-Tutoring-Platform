@@ -375,7 +375,7 @@ const QuestionGenerator = () => {
                             {i + 1}
                           </div>
                           <div style={{
-                            background: "#f8fafc", borderRadius: "10px", padding: "10px 14px",
+                            borderRadius: "10px", padding: "10px 14px",
                             flex: 1, color: "#0f172a", fontSize: "0.9rem", lineHeight: "1.5",
                             fontWeight: i === question.steps.length - 1 ? "700" : "400",
                             border: i === question.steps.length - 1 ? "1.5px solid #16a34a" : "1px solid #e2e8f0",

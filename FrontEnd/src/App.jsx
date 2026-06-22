@@ -15,6 +15,7 @@ import AddContent from './pages/admin/AddContent';
 import LessonCompanion from './pages/user/lessonCompanion';
 import Lessons from './pages/user/lessons';
 import MockExam from './pages/user/MockExam';
+import MathTutorChat from './pages/user/MathTutorChat';
 function App() {
 
   return (
@@ -34,6 +35,7 @@ function App() {
           <Route path="/lesson/:id" element={<LessonCompanion />} />
           <Route path="/lessons" element={<Lessons />} />
           <Route path="/mock-exam" element={<MockExam />} />
+          <Route path="/math-tutor" element={<MathTutorChat />} />
         </Routes>
         <Footer />
     </Router>

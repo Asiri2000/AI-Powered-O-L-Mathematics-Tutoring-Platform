@@ -8,7 +8,7 @@ export default function LearningSlide({ stepData, onNext }) {
   const [isImageVisible, setIsImageVisible] = useState(true);
 
   const handleCheck = () => {
-    const option = stepData.options.find(opt => opt.id === selectedOption);
+    const option = stepData.answer_options.find(opt => opt.id === selectedOption);
     if (option?.is_correct) {
       setStatus('correct');
     } else {
@@ -28,7 +28,7 @@ export default function LearningSlide({ stepData, onNext }) {
   }, []);
 
   // Find correct option text to show when the user answers incorrectly
-  const correctOptionText = stepData?.options?.find(opt => opt.is_correct)?.option_text ?? '';
+  const correctOptionText = stepData?.answer_options?.find(opt => opt.is_correct)?.option_text ?? '';
 
   return (
     // 1. MAIN CONTAINER: Takes full height of parent, splits into Scrollable Body + Footer
@@ -82,7 +82,7 @@ export default function LearningSlide({ stepData, onNext }) {
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pb-4">
-            {stepData.options.map((option) => (
+            {stepData.answer_options.map((option) => (
               <motion.button
                 key={option.id}
                 whileTap={{ scale: 0.98 }}

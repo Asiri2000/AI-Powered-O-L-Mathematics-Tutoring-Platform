@@ -139,4 +139,20 @@ export const generateMockExam = async (grade) => {
   return response.data;
 };
 
+/**
+ * =========================
+ * 🤖 MATHEMATICS TUTOR CHAT APIs
+ * =========================
+ */
+
+export const sendChatMessage = async (userInput) => {
+  const response = await api.post("/chat", { userInput });
+  return response.data;
+};
+
+export const getAvailableModels = async () => {
+  const response = await api.get("/chat/models");
+  return response.data;
+};
+
 export default api;
