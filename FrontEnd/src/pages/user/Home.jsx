@@ -6,7 +6,8 @@ import {
   MessageCircle, 
   TrendingUp, 
   ArrowRight, 
-  CheckCircle2 
+  CheckCircle2,
+  BookOpen, ClipboardList 
 } from 'lucide-react';
 import img1 from '../../assets/student.png'; 
 
@@ -80,19 +81,15 @@ const Home = () => {
         </div>
       </div>
 
-      {/* =========================================
-          FEATURE GRID
-         ========================================= */}
-      {/* This container matches the Hero Section width */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
+     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-20">
         <div className="text-center mb-12 sm:mb-16">
-          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2 sm:mb-4">Everything you need to succeed</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2 sm:mb-4">
+            Everything you need to succeed
+          </h2>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
-          
-          {/* Feature 1 */}
-          <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-sm hover:shadow-md transition-all border border-green-50 group cursor-pointer" onClick={() => navigate('/generator')}>
+           <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-sm hover:shadow-md transition-all border border-green-50 group cursor-pointer" onClick={() => navigate('/generator')}>
             <div className="w-12 sm:w-14 h-12 sm:h-14 bg-green-100 rounded-2xl flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-110 transition-transform">
               <Target className="w-6 sm:w-8 h-6 sm:h-8 text-green-700" />
             </div>
@@ -102,8 +99,7 @@ const Home = () => {
             </p>
           </div>
 
-          {/* Feature 2 */}
-          <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-sm hover:shadow-md transition-all border border-green-50 group cursor-pointer" onClick={() => navigate('http://localhost:3000/')}>
+          <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-sm hover:shadow-md transition-all border border-green-50 group cursor-pointer" onClick={() => navigate('/math-tutor')}>
             <div className="w-12 sm:w-14 h-12 sm:h-14 bg-blue-100 rounded-2xl flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-110 transition-transform">
               <MessageCircle className="w-6 sm:w-8 h-6 sm:h-8 text-blue-700" />
             </div>
@@ -113,7 +109,6 @@ const Home = () => {
             </p>
           </div>
 
-          {/* Feature 3 */}
           <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-sm hover:shadow-md transition-all border border-green-50 group cursor-pointer" onClick={() => navigate('/performance')}>
             <div className="w-12 sm:w-14 h-12 sm:h-14 bg-purple-100 rounded-2xl flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-110 transition-transform">
               <TrendingUp className="w-6 sm:w-8 h-6 sm:h-8 text-purple-700" />
@@ -121,6 +116,26 @@ const Home = () => {
             <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-2 sm:mb-3">Real-time Performance</h3>
             <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
               Visualize your progress. Identify patterns in your mistakes and watch your average score improve over time.
+            </p>
+          </div>
+
+          <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-sm hover:shadow-md transition-all border border-green-50 group cursor-pointer" onClick={() => navigate('/lessons')}>
+            <div className="w-12 sm:w-14 h-12 sm:h-14 bg-amber-100 rounded-2xl flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-110 transition-transform">
+              <BookOpen className="w-6 sm:w-8 h-6 sm:h-8 text-amber-700" />
+            </div>
+            <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-2 sm:mb-3">Lesson Companion</h3>
+            <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
+              Learn step-by-step theory and practice specific topics at your own pace before diving into full exams.
+            </p>
+          </div>
+
+          <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-sm hover:shadow-md transition-all border border-green-50 group cursor-pointer" onClick={() => navigate('/mock-exam')}>
+            <div className="w-12 sm:w-14 h-12 sm:h-14 bg-rose-100 rounded-2xl flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-110 transition-transform">
+              <ClipboardList className="w-6 sm:w-8 h-6 sm:h-8 text-rose-700" />
+            </div>
+            <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-2 sm:mb-3">Mock Exam Simulation</h3>
+            <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
+              Test your readiness with timed, full-length simulations modeled after the real G.C.E. O/L mathematics paper.
             </p>
           </div>
 
