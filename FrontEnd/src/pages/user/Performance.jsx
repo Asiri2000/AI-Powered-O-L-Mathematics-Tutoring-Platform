@@ -120,7 +120,7 @@ if (!summary || Number(summary.total_attempts) === 0) return <EmptyScreen />;
   const level = getLevel(acc);
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f8fafc", padding: "2rem 1rem" }}>
+    <div style={{ minHeight: "100vh", background: "#F3FBF6", padding: "2rem 1rem" }}>
       <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
 
         {/* ======= PAGE TITLE ======= */}
@@ -335,7 +335,7 @@ const ErrorScreen = ({ message }) => (
 const EmptyScreen = () => {
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f8fafc", padding: "4rem 2rem", display: "flex", flexDirection: "column", alignItems: "center" }}>
+    <div style={{ minHeight: "100vh", background: "#F3FBF6", padding: "4rem 2rem", display: "flex", flexDirection: "column", alignItems: "center" }}>
       
       {/* Welcome Message */}
       <div style={{ textAlign: "center", marginBottom: "4rem", maxWidth: "600px" }}>

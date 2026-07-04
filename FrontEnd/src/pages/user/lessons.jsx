@@ -48,7 +48,7 @@ export default function Lessons() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8 pt-24">
+    <div className="min-h-screen bg-[#F3FBF6] p-8 pt-6">
       <div className="max-w-6xl mx-auto">
         
         {/* --- HEADER SECTION --- */}
