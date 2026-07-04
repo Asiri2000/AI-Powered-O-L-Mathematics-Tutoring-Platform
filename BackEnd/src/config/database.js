@@ -9,6 +9,11 @@ const sequelize = new Sequelize(
     port: process.env.POSTGRES_PORT,
     dialect: 'postgres',
     logging: false,
+    ...(process.env.PGSSLMODE === 'require' && {
+      dialectOptions: {
+        ssl: { require: true, rejectUnauthorized: false },
+      },
+    }),
   }
 );
 

@@ -125,11 +125,52 @@ async function fetchAvailableModels() {
 }
 
 /**
+ * Build a system prompt tailored to the requested language.
+ * @param {'en'|'si'} lang
+ * @returns {string}
+ */
+function buildSystemPrompt(lang) {
+  const base = `You are a mathematics tutor for G.C.E. Ordinary Level students in Sri Lanka (grades 10-11).
+
+CRITICAL FORMATTING RULES — follow these exactly:
+1. NEVER use LaTeX or dollar-sign math: no $...$ or $$...$$. The chat app cannot render it.
+2. Use PLAIN Unicode math symbols instead:
+   - π (pi), ² ³ (squared/cubed), √ (root), ÷ (divide), × (multiply)
+   - ± (plus-minus), ∠ (angle), △ (triangle), ° (degrees), ₁ ₂ (subscripts)
+   - → (arrow), ≤ ≥ (inequalities), ≠ (not equal), ≈ (approximately)
+3. Write formulas as plain text. Examples:
+   - "Area = π × r²"    NOT  "$Area = \\pi r^2$"
+   - "x = (-b ± √(b² - 4ac)) / 2a"   NOT  "$x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}$"
+   - "sin²θ + cos²θ = 1"   NOT  "$\\sin^2\\theta + \\cos^2\\theta = 1$"
+4. Use **bold** for headings and important terms: **Step 1:**, **Formula:**, **Answer:**
+5. Use plain numbered steps: 1. 2. 3. (not markdown lists)
+
+STYLE RULES:
+- Be CONCISE: 4-8 short paragraphs, not long essays
+- Focus on Sri Lankan O/L syllabus: algebra, geometry, trigonometry, stats, probability, sets, graphs, mensuration, number systems
+- Show each step clearly like a teacher writing on a blackboard
+- End every response with **Answer:** followed by the final result`;
+
+  if (lang === 'si') {
+    return `${base}
+
+LANGUAGE: Respond COMPLETELY in SINHALA (සිංහල). Write every word, every explanation, every step in Sinhala. Use Sinhala mathematical terms familiar to O/L students (e.g., අරය for radius, වර්ගඵලය for area, පරිමිතිය for perimeter, සමීකරණය for equation, පයිතගරස් ප්‍රමේය for Pythagorean theorem). Keep mathematical symbols and formulas in standard notation (π, ², √, =, +, -, ×, ÷) — only the explanatory text should be in Sinhala.`;
+  }
+
+  return `${base}
+
+LANGUAGE: Respond in ENGLISH. Use simple, clear English suitable for Sri Lankan students.`;
+}
+/**
  * Run a chat message through Gemini AI with model fallback.
  * Tries preferredModel first, then MODEL_FALLBACKS,
  * filtering by cached models that support generateContent.
+ *
+ * @param {string} userInput - The user's chat message
+ * @param {'en'|'si'} language - Response language ('en' = English, 'si' = Sinhala)
+ * @param {string|null} preferredModel - Optional model override
  */
-async function runChat(userInput, preferredModel = null) {
+async function runChat(userInput, language = 'en', preferredModel = null) {
   const API_KEY = process.env.GEMINI_API_KEY;
   if (!API_KEY) {
     throw new Error('Missing GEMINI_API_KEY in server environment');
@@ -158,7 +199,7 @@ async function runChat(userInput, preferredModel = null) {
     temperature: isMathLike(userInput) ? 0 : 0.9,
     topK: 1,
     topP: 1,
-    maxOutputTokens: 1000,
+    maxOutputTokens: 4096,
   };
 
   const safetySettings = [
@@ -194,7 +235,7 @@ async function runChat(userInput, preferredModel = null) {
             role: 'user',
             parts: [
               {
-                text: 'You are a helpful mathematics tutor for G.C.E. O/L students in Sri Lanka. Answer questions clearly with step-by-step explanations. For math problems, show correct steps and prefer exact forms when reasonable. Use simple language suitable for grade 10-11 students.',
+                text: buildSystemPrompt(language),
               },
             ],
           },
@@ -226,5 +267,6 @@ module.exports = {
   solveQuadratic,
   fetchAvailableModels,
   runChat,
+  buildSystemPrompt,
   getModelCache: () => MODEL_CACHE,
 };

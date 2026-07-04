@@ -24,9 +24,15 @@ const api = axios.create({
  */
 api.interceptors.request.use(
   (config) => {
+    // JWT for logged-in users
     const token = sessionStorage.getItem("accessToken");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+    // Guest token for non-logged-in users (persisted in localStorage)
+    const guestToken = localStorage.getItem("guestToken");
+    if (guestToken) {
+      config.headers['x-guest-token'] = guestToken;
     }
     return config;
   },
