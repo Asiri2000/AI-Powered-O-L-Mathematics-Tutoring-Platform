@@ -32,11 +32,9 @@ export default function LearningSlide({ stepData, onNext }) {
 
   return (
     // 1. MAIN CONTAINER: Takes full height of parent, splits into Scrollable Body + Footer
-    <div className="flex flex-col h-full w-full max-w-4xl mx-auto bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-      
+<div className="flex flex-col h-fit max-h-full w-full max-w-4xl mx-auto bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">      
       {/* 2. SCROLLABLE BODY: Wraps Theory + Question. This part scrolls independently. */}
-      <div className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
-        
+<div className="overflow-y-auto p-4 md:p-8 custom-scrollbar">        
         {/* --- THEORY SECTION --- */}
         {stepData.theory_text && (
           <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg mb-6">
@@ -81,7 +79,7 @@ export default function LearningSlide({ stepData, onNext }) {
             {stepData.question_text}
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pb-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {stepData.answer_options.map((option) => (
               <motion.button
                 key={option.id}

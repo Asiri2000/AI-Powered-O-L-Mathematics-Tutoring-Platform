@@ -82,7 +82,7 @@ export default function LessonCompanion() {
 
   // 5. MAIN INTERFACE
   return (
-    <div className="min-h-screen bg-gray-50 pt-16"> {/* pt-16 accounts for Navbar */}
+    <div className="w-full bg-gray-50 pt-12 pb-16"> {/* pt-16 accounts for Navbar */}
       
       {/* Progress Bar */}
       <div className="fixed top-16 left-0 w-full h-2 bg-gray-200 z-10">
@@ -98,9 +98,8 @@ export default function LessonCompanion() {
       )}
 
       {/* The Slide Content */}
-      <div className="container mx-auto h-[calc(100vh-80px)]">
-        <LearningSlide 
-          // Key forces re-render when index changes (crucial for animations)
+<div className="container mx-auto flex justify-center px-4">
+            <LearningSlide 
           key={currentIndex} 
           stepData={steps[currentIndex]} 
           onNext={handleNext}

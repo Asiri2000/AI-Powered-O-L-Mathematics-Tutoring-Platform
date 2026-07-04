@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { getOverallSummary, getChapterAnalytics } from "../../api";
 import {
-  TrendingUp, Award, BookOpen, CheckCircle2, Zap, Star, AlertTriangle, Target
+  TrendingUp, Award, BookOpen, CheckCircle2, Zap, Star, AlertTriangle, Target,
+  Brain, MessageSquare, FileText // <-- Added Brain, MessageSquare, and FileText
 } from "lucide-react";
 
 /* --- Badge Images --- */
@@ -114,8 +115,7 @@ const Performance = () => {
 
   if (loading) return <LoadingScreen />;
   if (error) return <ErrorScreen message={error} />;
-  if (!summary || summary.total_attempts === 0) return <EmptyScreen />;
-
+if (!summary || Number(summary.total_attempts) === 0) return <EmptyScreen />;
   const acc = parseFloat(summary.accuracy_percentage || 0);
   const level = getLevel(acc);
 
@@ -332,20 +332,95 @@ const ErrorScreen = ({ message }) => (
   </div>
 );
 
-const EmptyScreen = () => (
-  <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
-    <div style={{
-      background: "#fff", borderRadius: "20px", padding: "3rem 2rem",
-      textAlign: "center", maxWidth: "420px", boxShadow: "0 4px 20px rgba(0,0,0,0.08)"
-    }}>
-      <BookOpen style={{ width: "48px", height: "48px", color: "#16a34a", margin: "0 auto 16px" }} />
-      <h3 style={{ color: "#0f172a", fontWeight: "800", fontSize: "1.25rem", margin: "0 0 8px" }}>
-        No attempts yet
-      </h3>
-      <p style={{ color: "#64748b", margin: 0 }}>
-        Start answering questions to see your performance summary and lesson-by-lesson breakdown here.
-      </p>
+const EmptyScreen = () => {
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#f8fafc", padding: "4rem 2rem", display: "flex", flexDirection: "column", alignItems: "center" }}>
+      
+      {/* Welcome Message */}
+      <div style={{ textAlign: "center", marginBottom: "4rem", maxWidth: "600px" }}>
+        <h1 style={{ fontSize: "2.5rem", fontWeight: "800", color: "#0f172a", marginBottom: "1rem" }}>
+          Welcome to Your Learning Journey! 🚀
+        </h1>
+        <p style={{ color: "#64748b", fontSize: "1.1rem", lineHeight: "1.6" }}>
+          You haven't attempted any exercises yet. Jump into one of our modules below to start practicing and unlock your performance stats.
+        </p>
+      </div>
+
+      {/* Navigation Grid */}
+      <div style={{ 
+        display: "grid", 
+        gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", 
+        gap: "1.5rem", 
+        width: "100%", 
+        maxWidth: "1200px" 
+      }}>
+        
+        <FeatureCard 
+          icon={<BookOpen size={36} color="#16a34a" />} 
+          title="Lesson Companion" 
+          desc="Learn step-by-step theory and practice specific topics."
+          onClick={() => navigate('/lessons')} 
+          color="#dcfce7"
+        />
+        
+        <FeatureCard 
+          icon={<Brain size={36} color="#7c3aed" />} 
+          title="Question Generator" 
+          desc="Generate custom AI questions to test your skills."
+          onClick={() => navigate('/question-generator')} 
+          color="#ede9fe"
+        />
+        
+        <FeatureCard 
+          icon={<MessageSquare size={36} color="#0284c7" />} 
+          title="Mathematics Tutor" 
+          desc="Chat with our AI tutor for instant help and explanations."
+          onClick={() => navigate('/tutor')} 
+          color="#dbeafe"
+        />
+        
+        <FeatureCard 
+          icon={<FileText size={36} color="#d97706" />} 
+          title="Mock Exam" 
+          desc="Simulate a real exam environment to check your readiness."
+          onClick={() => navigate('/mock-exam')} 
+          color="#fef3c7"
+        />
+        
+      </div>
     </div>
+  );
+};
+
+// Helper component to make the cards look beautiful with hover effects
+const FeatureCard = ({ icon, title, desc, onClick, color }) => (
+  <div 
+    onClick={onClick}
+    style={{ 
+      background: "#fff", padding: "2rem", borderRadius: "20px", 
+      boxShadow: "0 4px 15px rgba(0,0,0,0.04)", cursor: "pointer",
+      border: "1px solid #f1f5f9", display: "flex", flexDirection: "column", 
+      alignItems: "center", textAlign: "center", transition: "all 0.2s ease"
+    }}
+    onMouseOver={(e) => { 
+      e.currentTarget.style.transform = 'translateY(-5px)'; 
+      e.currentTarget.style.boxShadow = '0 12px 25px rgba(0,0,0,0.08)'; 
+    }}
+    onMouseOut={(e) => { 
+      e.currentTarget.style.transform = 'translateY(0)'; 
+      e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.04)'; 
+    }}
+  >
+    <div style={{ background: color, padding: "1.25rem", borderRadius: "18px", marginBottom: "1.5rem" }}>
+      {icon}
+    </div>
+    <h3 style={{ fontSize: "1.25rem", fontWeight: "700", color: "#0f172a", margin: "0 0 0.75rem 0" }}>
+      {title}
+    </h3>
+    <p style={{ color: "#64748b", margin: 0, fontSize: "0.95rem", lineHeight: "1.5" }}>
+      {desc}
+    </p>
   </div>
 );
 

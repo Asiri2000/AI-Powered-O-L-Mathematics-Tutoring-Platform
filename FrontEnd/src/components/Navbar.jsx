@@ -33,8 +33,18 @@ const Navbar = () => {
         // Fetch performance pill
         try {
           const data = await getOverallSummary();
+          if (!data || Number(data.total_attempts) === 0) {
+            setPerfPill({ 
+              isNew: true, 
+              label: 'New Student', 
+              color: '#334155', 
+              bg: '#f8fafc', 
+              border: '#cbd5e1' 
+            });
+          } else {
           const acc = parseFloat(data?.accuracy_percentage || 0);
           setPerfPill(getPerformancePill(acc));
+          }
         } catch (_) {
           setPerfPill(null);
         }
