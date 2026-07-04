@@ -34,7 +34,7 @@ const ChatSession = sequelize.define('ChatSession', {
     type: DataTypes.STRING,
     allowNull: false,
     defaultValue: 'en',
-    validate: { isIn: [['en', 'si']] },
+    validate: { isIn: [['en', 'si', 'ta']] },
   },
 }, {
   tableName: 'chat_sessions',

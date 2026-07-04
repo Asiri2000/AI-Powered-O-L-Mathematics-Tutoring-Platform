@@ -5,14 +5,15 @@ import {
 } from 'lucide-react';
 import api from '../../api';
 import { formatMessage } from '../../utils/formatMessage';
+import { useLanguage, LANGUAGES } from '../../contexts/LanguageContext';
 
 // ---- Constants ----
 const GUEST_TOKEN_KEY = 'guestToken';
 const GREETING_TEXT =
-  "Hello! \ud83d\udc4b I'm your Mathematics Tutor, powered by AI.\n\nI can help you solve math problems step-by-step and explain concepts from the G.C.E. O/L syllabus. Just type your question below!";
+  "Hello! 👋 I'm your Mathematics Tutor, powered by AI.\n\nI can help you solve math problems step-by-step and explain concepts from the G.C.E. O/L syllabus. Just type your question below!";
 
 const QUICK_QUESTIONS = [
-  'Solve x\u00b2 + 5x + 6 = 0',
+  'Solve x² + 5x + 6 = 0',
   'What is the Pythagorean theorem?',
   'Explain how to find the area of a circle',
   'Study tips for mathematics',
@@ -33,15 +34,15 @@ const MathTutorChat = () => {
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [language, setLanguage] = useState('en');
+  const { language, setLanguage } = useLanguage();
 
   // Session state
   const [sessions, setSessions] = useState([]);
   const [activeSessionId, setActiveSessionId] = useState(null);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loadingHistory, setLoadingHistory] = useState(false);
 
-  // Messages — start with greeting
+  // Messages – start with greeting
   const [messages, setMessages] = useState([
     { id: 'greeting', sender: 'bot', text: GREETING_TEXT },
   ]);
@@ -74,7 +75,7 @@ const MathTutorChat = () => {
       const res = await api.get('/chat/sessions');
       setSessions(res.data.sessions || []);
     } catch {
-      // Not critical — sessions may be empty
+      // Not critical – sessions may be empty
     }
   }, []);
 
@@ -99,6 +100,7 @@ const MathTutorChat = () => {
       );
       setLanguage(session.language || 'en');
       setActiveSessionId(sessionId);
+      setSidebarOpen(false); // auto-close on mobile/overlay
     } catch {
       setError('Failed to load chat history.');
     } finally {
@@ -114,6 +116,7 @@ const MathTutorChat = () => {
       setSessions((prev) => [s, ...prev]);
       setActiveSessionId(s.id);
       setMessages([{ id: 'greeting', sender: 'bot', text: GREETING_TEXT }]);
+      setSidebarOpen(false);
     } catch {
       setError('Failed to create new session.');
     }
@@ -154,7 +157,7 @@ const MathTutorChat = () => {
         setSessions((prev) => [res.data.session, ...prev]);
         setActiveSessionId(sid);
       } catch {
-        // Proceed without persistence — chat still works
+        // Proceed without persistence
       }
     }
 
@@ -174,8 +177,7 @@ const MathTutorChat = () => {
       };
       setMessages((prev) => [...prev, botMsg]);
 
-      // Refresh sidebar (title may have been updated)
-      loadSessions();
+      loadSessions(); // refresh sidebar titles
     } catch (err) {
       const errorMsg =
         err.response?.data?.error ||
@@ -208,213 +210,219 @@ const MathTutorChat = () => {
 
   // ---- Render ----
   return (
-    <div className="flex h-screen bg-[#F3FBF6]">
-      {/* ======== SIDEBAR ======== */}
-      <div
-        className={`${
-          sidebarOpen ? 'w-72' : 'w-0'
-        } transition-all duration-300 bg-white border-r border-gray-200 flex flex-col overflow-hidden shrink-0`}
-      >
-        <div className="p-4 border-b border-gray-100 flex items-center justify-between">
-          <h2 className="font-semibold text-gray-800 text-sm">Chat History</h2>
-          <button
-            onClick={() => setSidebarOpen(false)}
-            className="p-1 hover:bg-gray-100 rounded-lg"
-          >
-            <X className="w-4 h-4 text-gray-400" />
-          </button>
-        </div>
-
-        <button
-          onClick={newSession}
-          className="mx-3 mt-3 flex items-center gap-2 px-3 py-2.5 bg-[#1b7a39] hover:bg-[#145c2b] text-white rounded-xl text-sm font-medium transition-all"
-        >
-          <Plus className="w-4 h-4" />
-          New Chat
-        </button>
-
-        <div className="flex-1 overflow-y-auto mt-3 px-2">
-          {sessions.length === 0 && (
-            <p className="text-gray-400 text-xs text-center mt-8 px-4">
-              No saved chats yet. Start a conversation!
-            </p>
-          )}
-          {sessions.map((s) => (
+   <div className="min-h-screen flex justify-center pt-4 sm:pt-8 bg-gray-100/80">
+      {/* ========== CHAT BOX – centered, fixed size ========== */}
+       <div className="w-[95%] sm:w-[90%] md:w-[80%] max-w-5xl h-[80vh] bg-white rounded-none md:rounded-2xl shadow-2xl border border-gray-200 overflow-hidden flex flex-col relative">
+        {/* Sidebar overlay – slides over the chat area */}
+        {sidebarOpen && (
+          <>
+            {/* Backdrop inside the chat box */}
             <div
-              key={s.id}
-              onClick={() => loadMessages(s.id)}
-              className={`group flex items-center gap-2 px-3 py-2.5 rounded-xl cursor-pointer mb-1 transition-all ${
-                activeSessionId === s.id
-                  ? 'bg-green-50 border border-green-200'
-                  : 'hover:bg-gray-50 border border-transparent'
-              }`}
-            >
-              <MessageSquare
-                className={`w-4 h-4 shrink-0 ${
-                  activeSessionId === s.id ? 'text-green-600' : 'text-gray-400'
-                }`}
-              />
-              <span className="flex-1 text-sm text-gray-700 truncate">{s.title}</span>
+              className="absolute inset-0 z-40 bg-black/20 backdrop-blur-sm"
+              onClick={() => setSidebarOpen(false)}
+            />
+            {/* Sidebar panel */}
+            <div className="absolute top-0 left-0 bottom-0 z-50 w-72 bg-white border-r border-gray-200 flex flex-col animate-slide-in-left">
+              <div className="p-4 border-b border-gray-100 flex items-center justify-between">
+                <h2 className="font-semibold text-gray-800 text-sm">Chat History</h2>
+                <button
+                  onClick={() => setSidebarOpen(false)}
+                  className="p-1 hover:bg-gray-100 rounded-lg"
+                >
+                  <X className="w-4 h-4 text-gray-400" />
+                </button>
+              </div>
+
               <button
-                onClick={(e) => deleteSession(s.id, e)}
-                className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-50 rounded transition-all"
+                onClick={newSession}
+                className="mx-3 mt-3 flex items-center gap-2 px-3 py-2.5 bg-[#1b7a39] hover:bg-[#145c2b] text-white rounded-xl text-sm font-medium transition-all"
               >
-                <Trash2 className="w-3.5 h-3.5 text-red-400" />
+                <Plus className="w-4 h-4" />
+                New Chat
               </button>
+
+              <div className="flex-1 overflow-y-auto mt-3 px-2">
+                {sessions.length === 0 && (
+                  <p className="text-gray-400 text-xs text-center mt-8 px-4">
+                    No saved chats yet. Start a conversation!
+                  </p>
+                )}
+                {sessions.map((s) => (
+                  <div
+                    key={s.id}
+                    onClick={() => loadMessages(s.id)}
+                    className={`group flex items-center gap-2 px-3 py-2.5 rounded-xl cursor-pointer mb-1 transition-all ${
+                      activeSessionId === s.id
+                        ? 'bg-green-50 border border-green-200'
+                        : 'hover:bg-gray-50 border border-transparent'
+                    }`}
+                  >
+                    <MessageSquare
+                      className={`w-4 h-4 shrink-0 ${
+                        activeSessionId === s.id ? 'text-green-600' : 'text-gray-400'
+                      }`}
+                    />
+                    <span className="flex-1 text-sm text-gray-700 truncate">{s.title}</span>
+                    <button
+                      onClick={(e) => deleteSession(s.id, e)}
+                      className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-50 rounded transition-all"
+                    >
+                      <Trash2 className="w-3.5 h-3.5 text-red-400" />
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
-          ))}
-        </div>
-      </div>
+          </>
+        )}
 
-      {/* ======== MAIN CHAT ======== */}
-      <div className="flex-1 flex flex-col min-w-0">
         {/* Header */}
-        <div className="bg-white shadow-sm px-6 py-3 flex items-center gap-3 shrink-0">
-          {!sidebarOpen && (
-            <button onClick={() => setSidebarOpen(true)} className="p-1.5 hover:bg-gray-100 rounded-lg">
-              <Menu className="w-5 h-5 text-gray-500" />
-            </button>
-          )}
-          <div className="bg-green-100 p-2 rounded-full">
-            <Bot className="w-6 h-6 text-green-700" />
+        <div className="bg-white shadow-sm px-4 sm:px-6 py-3 flex items-center gap-3 shrink-0">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="p-1.5 hover:bg-gray-100 rounded-lg"
+          >
+            <Menu className="w-5 h-5 text-gray-500" />
+          </button>
+
+          <div className="bg-green-100 p-2 rounded-full hidden sm:flex">
+            <Bot className="w-5 h-5 text-green-700" />
           </div>
-          <div>
-            <h1 className="text-lg font-bold text-black">Mathematics Tutor</h1>
-            <p className="text-xs text-gray-500">G.C.E. O/L AI Assistant</p>
+          <div className="min-w-0">
+            <h1 className="text-base sm:text-lg font-bold text-gray-900 truncate">Mathematics Tutor</h1>
+            <p className="text-xs text-gray-500 hidden sm:block">G.C.E. O/L AI Assistant</p>
           </div>
 
-          <div className="ml-auto flex items-center gap-3">
+          <div className="ml-auto flex items-center gap-2 sm:gap-3">
             {/* Language toggle */}
             <div className="flex items-center bg-gray-100 rounded-full p-0.5">
-              <button
-                onClick={() => setLanguage('en')}
-                disabled={isLoading}
-                className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
-                  language === 'en' ? 'bg-[#1b7a39] text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                EN
-              </button>
-              <button
-                onClick={() => setLanguage('si')}
-                disabled={isLoading}
-                className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
-                  language === 'si' ? 'bg-[#1b7a39] text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                සිං
-              </button>
+              {LANGUAGES.map(({ code, label }) => (
+                <button
+                  key={code}
+                  onClick={() => setLanguage(code)}
+                  disabled={isLoading}
+                  className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-all ${
+                    language === code
+                      ? 'bg-[#1b7a39] text-white shadow-sm'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
 
-            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-purple-50 rounded-full border border-purple-100">
+            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 bg-purple-50 rounded-full border border-purple-100">
               <Sparkles className="w-3.5 h-3.5 text-purple-500" />
               <span className="text-[10px] font-medium text-purple-600">AI</span>
             </div>
           </div>
         </div>
 
-        {/* Messages */}
-        <div className="flex-1 flex flex-col px-4 py-4 overflow-hidden">
-          <div
-            ref={chatScrollRef}
-            className="flex-1 overflow-y-auto mb-4 pr-2 space-y-4 custom-scrollbar"
-          >
-            {loadingHistory && (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="w-6 h-6 text-green-500 animate-spin" />
-              </div>
-            )}
+        {/* Messages area – scrollable */}
+        <div
+          ref={chatScrollRef}
+          className="flex-1 overflow-y-auto px-4 py-4 space-y-4 custom-scrollbar"
+        >
+          {loadingHistory && (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-6 h-6 text-green-500 animate-spin" />
+            </div>
+          )}
 
-            {messages.map((msg) => (
+          {messages.map((msg) => (
+            <div
+              key={msg.id}
+              className={`flex items-start gap-2 sm:gap-3 ${
+                msg.sender === 'user' ? 'flex-row-reverse' : 'flex-row'
+              }`}
+            >
               <div
-                key={msg.id}
-                className={`flex items-start gap-3 ${msg.sender === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
+                className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center shrink-0 ${
+                  msg.sender === 'bot'
+                    ? msg.isError ? 'bg-red-100' : 'bg-[#1b7a39]'
+                    : 'bg-gray-700'
+                }`}
               >
+                {msg.sender === 'bot' ? (
+                  msg.isError ? <Bot className="w-4 h-4 text-red-600" /> : <Bot className="w-4 h-4 text-white" />
+                ) : (
+                  <User className="w-4 h-4 text-white" />
+                )}
+              </div>
+
+              <div className="max-w-[85%] md:max-w-[75%]">
                 <div
-                  className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${
+                  className={`p-3 sm:p-3.5 rounded-2xl text-sm leading-relaxed ${
                     msg.sender === 'bot'
-                      ? msg.isError ? 'bg-red-100' : 'bg-[#1b7a39]'
-                      : 'bg-gray-700'
+                      ? msg.isError
+                        ? 'bg-red-50 text-red-800 rounded-tl-none border border-red-100'
+                        : 'bg-[#dcfce7] text-green-900 rounded-tl-none'
+                      : 'bg-[#f3f4f6] text-gray-800 rounded-tr-none'
                   }`}
                 >
-                  {msg.sender === 'bot' ? (
-                    msg.isError ? <Bot className="w-4 h-4 text-red-600" /> : <Bot className="w-4 h-4 text-white" />
+                  {msg.sender === 'bot' && !msg.isError ? (
+                    <div
+                      className="chat-formatted [&_strong]:text-green-800 [&_strong]:font-semibold [&_code]:bg-green-100 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono [&_code]:text-green-800 [&_hr]:border-green-200"
+                      dangerouslySetInnerHTML={{ __html: formatMessage(msg.text) }}
+                    />
                   ) : (
-                    <User className="w-4 h-4 text-white" />
+                    <span className="whitespace-pre-wrap">{msg.text}</span>
                   )}
                 </div>
 
-                <div className="max-w-[75%]">
-                  <div
-                    className={`p-3.5 rounded-2xl text-sm leading-relaxed ${
-                      msg.sender === 'bot'
-                        ? msg.isError
-                          ? 'bg-red-50 text-red-800 rounded-tl-none border border-red-100'
-                          : 'bg-[#dcfce7] text-green-900 rounded-tl-none'
-                        : 'bg-[#f3f4f6] text-gray-800 rounded-tr-none'
-                    }`}
+                {msg.source === 'deterministic' && (
+                  <div className="flex items-center gap-1 mt-1 ml-1">
+                    <Calculator className="w-3 h-3 text-blue-500" />
+                    <span className="text-[10px] text-blue-500 font-medium">Solved deterministically</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+
+          {isLoading && (
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 bg-[#1b7a39]">
+                <Bot className="w-4 h-4 text-white" />
+              </div>
+              <div className="bg-[#dcfce7] rounded-2xl rounded-tl-none p-3.5">
+                <div className="flex items-center gap-2">
+                  <Loader2 className="w-4 h-4 text-green-600 animate-spin" />
+                  <span className="text-sm text-green-700">Thinking...</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {error && (
+            <div className="mx-2 sm:mx-12 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+              {error}
+            </div>
+          )}
+
+          {messages.length === 1 && !isLoading && !loadingHistory && (
+            <div className="mt-8 animate-fade-in">
+              <p className="text-gray-500 mb-4 ml-2 sm:ml-12">Quick questions:</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 ml-2 sm:ml-12">
+                {QUICK_QUESTIONS.map((q, i) => (
+                  <button
+                    key={i}
+                    onClick={() => handleSend(q)}
+                    disabled={isLoading}
+                    className="text-left p-3 sm:p-4 bg-white hover:bg-green-50 border border-gray-100 hover:border-green-200 rounded-xl text-gray-700 transition-all duration-200 text-sm font-medium shadow-sm disabled:opacity-50"
                   >
-                    {msg.sender === 'bot' && !msg.isError ? (
-                      <div
-                        className="chat-formatted [&_strong]:text-green-800 [&_strong]:font-semibold [&_code]:bg-green-100 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono [&_code]:text-green-800 [&_hr]:border-green-200"
-                        dangerouslySetInnerHTML={{ __html: formatMessage(msg.text) }}
-                      />
-                    ) : (
-                      <span className="whitespace-pre-wrap">{msg.text}</span>
-                    )}
-                  </div>
-
-                  {msg.source === 'deterministic' && (
-                    <div className="flex items-center gap-1 mt-1 ml-1">
-                      <Calculator className="w-3 h-3 text-blue-500" />
-                      <span className="text-[10px] text-blue-500 font-medium">Solved deterministically</span>
-                    </div>
-                  )}
-                </div>
+                    {q}
+                  </button>
+                ))}
               </div>
-            ))}
+            </div>
+          )}
+        </div>
 
-            {isLoading && (
-              <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 bg-[#1b7a39]">
-                  <Bot className="w-4 h-4 text-white" />
-                </div>
-                <div className="bg-[#dcfce7] rounded-2xl rounded-tl-none p-3.5">
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 text-green-600 animate-spin" />
-                    <span className="text-sm text-green-700">Thinking...</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {error && (
-              <div className="mx-12 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
-                {error}
-              </div>
-            )}
-
-            {messages.length === 1 && !isLoading && !loadingHistory && (
-              <div className="mt-8 animate-fade-in">
-                <p className="text-gray-500 mb-4 ml-12">Quick questions:</p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ml-12">
-                  {QUICK_QUESTIONS.map((q, i) => (
-                    <button
-                      key={i}
-                      onClick={() => handleSend(q)}
-                      disabled={isLoading}
-                      className="text-left p-4 bg-[#f3f4f6] hover:bg-green-50 border border-transparent hover:border-green-200 rounded-xl text-gray-700 transition-all duration-200 text-sm font-medium disabled:opacity-50"
-                    >
-                      {q}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Input */}
-          <div className="relative flex items-center gap-3 pt-4 border-t border-gray-100 shrink-0">
+        {/* Input – always visible, never hidden */}
+        <div className="shrink-0 border-t border-gray-200 bg-white/90 backdrop-blur-sm px-4 py-3">
+          <div className="flex items-center gap-3">
             <input
               ref={inputRef}
               type="text"
@@ -423,7 +431,7 @@ const MathTutorChat = () => {
               onKeyDown={handleKeyDown}
               placeholder="Ask me a math question..."
               disabled={isLoading}
-              className="flex-1 bg-gray-50 border border-gray-200 text-gray-800 text-sm rounded-2xl py-3 px-5 focus:outline-none focus:ring-2 focus:ring-green-500/40 focus:border-green-400 shadow-sm placeholder-gray-400 disabled:opacity-50 transition-all"
+              className="flex-1 bg-gray-50 border border-gray-200 text-gray-800 text-sm rounded-2xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-500/40 focus:border-green-400 shadow-sm placeholder-gray-400 disabled:opacity-50 transition-all"
             />
             <button
               onClick={() => handleSend(inputText)}

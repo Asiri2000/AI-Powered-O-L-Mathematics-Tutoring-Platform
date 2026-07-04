@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import './App.css'
+import { LanguageProvider } from './contexts/LanguageContext'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
@@ -19,6 +20,7 @@ import MathTutorChat from './pages/user/MathTutorChat';
 function App() {
 
   return (
+    <LanguageProvider>
     <Router>
         <Navbar />
         
@@ -39,6 +41,7 @@ function App() {
         </Routes>
         <Footer />
     </Router>
+    </LanguageProvider>
   )
 }
 

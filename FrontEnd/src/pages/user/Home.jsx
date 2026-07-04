@@ -49,8 +49,8 @@ const Home = () => {
                 <ArrowRight className="w-4 sm:w-5 h-4 sm:h-5" />
               </button>
               <a 
-                href="http://localhost:3000/" 
-                target="_blank" 
+                href="/math-tutor" 
+                // target="_blank" 
                 rel="noopener noreferrer"
                 className="bg-white hover:bg-gray-50 text-slate-700 text-base sm:text-lg font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-xl border border-gray-200 shadow-sm transition-all flex items-center justify-center"
               >

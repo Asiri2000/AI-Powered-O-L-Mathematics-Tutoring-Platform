@@ -2,8 +2,6 @@ const chatService = require('../services/chatService');
 const ChatMessage = require('../models/ChatMessage');
 const ChatSession = require('../models/ChatSession');
 
-const MATH_SOLVER_ENABLED = process.env.MATH_SOLVER_ENABLED !== 'false';
-
 /**
  * Helper: auto-save a message to the database if a sessionId is provided.
  * Also auto-titles the session from the first user message.
@@ -31,15 +29,38 @@ async function persistMessage(sessionId, role, content, source = null) {
 }
 
 /**
+ * Load the last N messages from a session and convert them to Gemini
+ * chat history format (role: 'user' | 'model'), oldest first.
+ * Used to give the AI conversation context so it "remembers" past exchanges.
+ */
+async function loadRecentHistory(sessionId, count = 10) {
+  if (!sessionId) return [];
+
+  const messages = await ChatMessage.findAll({
+    where: { sessionId },
+    order: [['createdAt', 'DESC']],
+    limit: count,
+    attributes: ['role', 'content'],
+  });
+
+  // Reverse to chronological order and map 'bot' → 'model' for Gemini
+  return messages.reverse().map((m) => ({
+    role: m.role === 'bot' ? 'model' : 'user',
+    parts: [{ text: m.content }],
+  }));
+}
+
+/**
  * POST /api/chat
  * Processes a chat message. Routes deterministic quadratic equations
  * through the built-in solver; everything else goes to Gemini AI.
  * Auto-saves user + bot messages when sessionId is provided.
+ * Passes last 5 conversation turns as context so the AI remembers.
  */
 const postChat = async (req, res, next) => {
   try {
     const userInput = req.body?.userInput;
-    const language = req.body?.language || 'en';
+    const language = req.body?.language || req.headers['x-language'] || 'en';
     const sessionId = req.body?.sessionId || null;
 
     if (!userInput) {
@@ -51,18 +72,11 @@ const postChat = async (req, res, next) => {
     // Save user message
     await persistMessage(sessionId, 'user', userInput.trim());
 
-    // Deterministic math solver
-    if (MATH_SOLVER_ENABLED) {
-      const quad = chatService.parseQuadratic(userInput);
-      if (quad) {
-        const solution = chatService.solveQuadratic(quad);
-        await persistMessage(sessionId, 'bot', solution, 'deterministic');
-        return res.json({ response: solution, source: 'deterministic' });
-      }
-    }
+    // Load last 5 exchanges (10 messages) for conversation memory
+    const recentHistory = await loadRecentHistory(sessionId, 10);
 
-    // AI model
-    const response = await chatService.runChat(userInput, language);
+    // AI model — pass recent history for context
+    const response = await chatService.runChat(userInput, language, recentHistory);
     await persistMessage(sessionId, 'bot', response, 'model');
 
     res.json({ response, source: 'model' });

@@ -126,7 +126,7 @@ async function fetchAvailableModels() {
 
 /**
  * Build a system prompt tailored to the requested language.
- * @param {'en'|'si'} lang
+ * @param {'en'|'si'|'ta'} lang
  * @returns {string}
  */
 function buildSystemPrompt(lang) {
@@ -157,6 +157,12 @@ STYLE RULES:
 LANGUAGE: Respond COMPLETELY in SINHALA (සිංහල). Write every word, every explanation, every step in Sinhala. Use Sinhala mathematical terms familiar to O/L students (e.g., අරය for radius, වර්ගඵලය for area, පරිමිතිය for perimeter, සමීකරණය for equation, පයිතගරස් ප්‍රමේය for Pythagorean theorem). Keep mathematical symbols and formulas in standard notation (π, ², √, =, +, -, ×, ÷) — only the explanatory text should be in Sinhala.`;
   }
 
+  if (lang === 'ta') {
+    return `${base}
+
+LANGUAGE: Respond COMPLETELY in TAMIL (தமிழ்). Write every word, every explanation, every step in Tamil. Use Tamil mathematical terms familiar to O/L students (e.g., ஆரம் for radius, பரப்பளவு for area, சுற்றளவு for perimeter, சமன்பாடு for equation, பித்தகோரஸ் தேற்றம் for Pythagorean theorem). Keep mathematical symbols and formulas in standard notation (π, ², √, =, +, -, ×, ÷) — only the explanatory text should be in Tamil.`;
+  }
+
   return `${base}
 
 LANGUAGE: Respond in ENGLISH. Use simple, clear English suitable for Sri Lankan students.`;
@@ -167,10 +173,11 @@ LANGUAGE: Respond in ENGLISH. Use simple, clear English suitable for Sri Lankan 
  * filtering by cached models that support generateContent.
  *
  * @param {string} userInput - The user's chat message
- * @param {'en'|'si'} language - Response language ('en' = English, 'si' = Sinhala)
+ * @param {'en'|'si'|'ta'} language - Response language ('en' = English, 'si' = Sinhala, 'ta' = Tamil)
+ * @param {Array} conversationHistory - Previous messages for context [{role, parts}]
  * @param {string|null} preferredModel - Optional model override
  */
-async function runChat(userInput, language = 'en', preferredModel = null) {
+async function runChat(userInput, language = 'en', conversationHistory = [], preferredModel = null) {
   const API_KEY = process.env.GEMINI_API_KEY;
   if (!API_KEY) {
     throw new Error('Missing GEMINI_API_KEY in server environment');
@@ -227,19 +234,20 @@ async function runChat(userInput, language = 'en', preferredModel = null) {
     try {
       console.log(`[chatService] trying model: ${m}`);
       const model = genAI.getGenerativeModel({ model: m });
+
+      // Build history: system prompt first, then recent conversation for memory
+      const history = [
+        {
+          role: 'user',
+          parts: [{ text: buildSystemPrompt(language) }],
+        },
+        ...conversationHistory,
+      ];
+
       const chat = model.startChat({
         generationConfig,
         safetySettings,
-        history: [
-          {
-            role: 'user',
-            parts: [
-              {
-                text: buildSystemPrompt(language),
-              },
-            ],
-          },
-        ],
+        history,
       });
 
       const result = await chat.sendMessage(userInput);

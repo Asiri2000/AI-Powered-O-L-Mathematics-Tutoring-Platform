@@ -34,6 +34,9 @@ api.interceptors.request.use(
     if (guestToken) {
       config.headers['x-guest-token'] = guestToken;
     }
+    // Language preference — read from localStorage (set by LanguageContext)
+    const lang = localStorage.getItem("appLanguage") || 'en';
+    config.headers['x-language'] = lang;
     return config;
   },
   (error) => Promise.reject(error)
