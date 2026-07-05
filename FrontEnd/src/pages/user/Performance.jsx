@@ -11,7 +11,7 @@ import VeryGoodBadge from "../../assets/badges/B.jpg";
 import CreditBadge from "../../assets/badges/C.jpg";
 import OrdinaryBadge from "../../assets/badges/S.jpg";
 import TryBadge from "../../assets/badges/try.png";
-
+import { useNavigate } from "react-router-dom";
 /* ===========================
    PERFORMANCE LEVEL LOGIC
 =========================== */
@@ -333,7 +333,8 @@ const ErrorScreen = ({ message }) => (
 );
 
 const EmptyScreen = () => {
-
+  
+const navigate = useNavigate();
   return (
     <div style={{ minHeight: "100vh", background: "#F3FBF6", padding: "4rem 2rem", display: "flex", flexDirection: "column", alignItems: "center" }}>
       
@@ -368,7 +369,7 @@ const EmptyScreen = () => {
           icon={<Brain size={36} color="#7c3aed" />} 
           title="Question Generator" 
           desc="Generate custom AI questions to test your skills."
-          onClick={() => navigate('/question-generator')} 
+          onClick={() => navigate('/generator')} 
           color="#ede9fe"
         />
         
@@ -376,7 +377,7 @@ const EmptyScreen = () => {
           icon={<MessageSquare size={36} color="#0284c7" />} 
           title="Mathematics Tutor" 
           desc="Chat with our AI tutor for instant help and explanations."
-          onClick={() => navigate('/tutor')} 
+          onClick={() => navigate('/math-tutor')} 
           color="#dbeafe"
         />
         

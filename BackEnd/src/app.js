@@ -15,7 +15,7 @@ const dashboardRoutes = require('./routes/dashboardRoutes');
 const mockExamRoutes = require('./routes/mockExamRoutes');
 const lessonRoutes = require('./routes/lessonRoutes');
 const chatRoutes = require('./routes/chatRoutes');
-
+const adminRoutes = require('./routes/adminRoutes'); // adjust path if needed
 // Error handler
 const errorHandler = require('./middleware/errorHandler');
 
@@ -53,7 +53,7 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/mock-exam', mockExamRoutes);
 app.use('/api/lessons', lessonRoutes);
 app.use('/api/chat', chatRoutes);
-
+app.use('/api/admin', adminRoutes);
 /**
  * =========================
  * ❌ 404 HANDLER

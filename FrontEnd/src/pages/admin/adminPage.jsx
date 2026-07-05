@@ -133,7 +133,7 @@ function AdminPage() {
 
             {/* Settings Button */}
             <button
-              onClick={() => alert('Settings coming soon!')}
+              onClick={() => navigate('/admin/performance')}
               className="flex items-center justify-between p-6 bg-gradient-to-r from-green-50 to-green-100 border-2 border-green-200 rounded-lg hover:shadow-lg hover:scale-105 transition-all group"
             >
               <div className="flex items-center gap-4">
@@ -141,8 +141,8 @@ function AdminPage() {
                   <Settings className="w-6 h-6 text-green-600" />
                 </div>
                 <div className="text-left">
-                  <h3 className="font-bold text-slate-900">Settings</h3>
-                  <p className="text-sm text-slate-600">Configure platform settings</p>
+                  <h3 className="font-bold text-slate-900">Performance</h3>
+                  <p className="text-sm text-slate-600">View student performance metrics</p>
                 </div>
               </div>
               <ArrowRight className="w-5 h-5 text-green-600 group-hover:translate-x-1 transition-transform" />

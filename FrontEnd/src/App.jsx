@@ -16,6 +16,7 @@ import LessonCompanion from './pages/user/lessonCompanion';
 import Lessons from './pages/user/lessons';
 import MockExam from './pages/user/MockExam';
 import MathTutorChat from './pages/user/MathTutorChat';
+import StudentAnalyticsTable from './pages/admin/StudentAnalyticsTable';
 function App() {
 
   return (
@@ -36,6 +37,7 @@ function App() {
           <Route path="/lessons" element={<Lessons />} />
           <Route path="/mock-exam" element={<MockExam />} />
           <Route path="/math-tutor" element={<MathTutorChat />} />
+          <Route path="/admin/performance" element={<StudentAnalyticsTable />} />
         </Routes>
         <Footer />
     </Router>

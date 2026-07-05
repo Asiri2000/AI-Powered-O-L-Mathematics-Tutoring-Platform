@@ -155,4 +155,12 @@ export const getAvailableModels = async () => {
   return response.data;
 };
 
+export const getAllStudentAnalytics = async () => {
+  const token = sessionStorage.getItem('accessToken');
+  const response = await axios.get(`${API_URL}/admin/performance`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return response.data;
+};
+
 export default api;
