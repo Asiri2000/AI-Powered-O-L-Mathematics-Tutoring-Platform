@@ -138,15 +138,47 @@ GENERATOR_MAP = {
 # HELPERS
 # =========================================================
 
+# =========================================================
+# TOPIC NORMALIZATION MAP (frontend-friendly names → registry keys)
+# =========================================================
+
+# Map of exact title-cased frontend topic names to their registry equivalents.
+# This handles singular/plural variants, spacing differences, and extra articles.
+TOPIC_ALIASES = {
+    # Grade 10
+    "Formulae":          "Formula",
+    "Chords Of A Circle": "Chords Of Circle",
+    # Grade 11
+    "Tangents":          "Tangent",
+    "Midpoint Theorem":  "Mid Point Theorem",
+}
+
 def normalize_topic(topic: str) -> str:
     """
     Converts flexible topic inputs into registry-safe keys.
-    Examples:
-    - square_root -> Square Root
-    - SQUARE ROOT -> Square Root
-    - pythagoras_theorem -> Pythagoras Theorem
+
+    Handles:
+    - underscore → space, title case
+    - Roman numeral suffixes: "Logarithms I/II" → "Logarithms"
+    - Singular/plural: "Formulae" → "Formula", "Tangents" → "Tangent"
+    - Spacing variants: "Midpoint Theorem" → "Mid Point Theorem"
+    - Article variants: "Chords Of A Circle" → "Chords Of Circle"
     """
-    return topic.replace("_", " ").strip().title()
+    name = topic.replace("_", " ").strip().title()
+
+    # Known aliases (check before suffix stripping, as these are exact matches)
+    if name in TOPIC_ALIASES:
+        return TOPIC_ALIASES[name]
+
+    # Strip roman numeral suffixes I, II, III, IV
+    # Ordered longest first so " Ii" matches before " I"
+    roman_suffixes = [" Iii", " Ii", " Iv", " I"]
+    for suffix in roman_suffixes:
+        if name.endswith(suffix) and len(name) > len(suffix) + 2:
+            name = name[:-len(suffix)]
+            break
+
+    return name
 
 
 # =========================================================
