@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   ClipboardList, Timer, ChevronDown, ChevronUp,
   BookOpen, CheckCircle2, AlertCircle, Play, RotateCcw
@@ -20,6 +21,7 @@ const fmt = (s) => {
    MAIN COMPONENT
 ══════════════════════════════════════════════════ */
 const MockExam = () => {
+  const navigate = useNavigate();
   const [phase, setPhase] = useState("select"); // select | exam | review
   const [grade, setGrade] = useState(10);
   const [exam, setExam] = useState(null);
@@ -31,6 +33,17 @@ const MockExam = () => {
   const [answers, setAnswers] = useState({});          // { "1_a": "...", "1_b": "..." }
   const [expandedParts, setExpandedParts] = useState({}); // for review accordion
   const timerRef = useRef(null);
+
+  /* ── Auth guard — redirect if not logged in ── */
+  useEffect(() => {
+    const token = sessionStorage.getItem("accessToken");
+    if (!token) {
+      navigate("/login", {
+        state: { message: "You need to sign in first to take a mock exam." },
+        replace: true,
+      });
+    }
+  }, []);
 
   /* ── Timer ── */
   useEffect(() => {
@@ -60,7 +73,15 @@ const MockExam = () => {
       setActiveQ(0);
       setPhase("exam");
     } catch (e) {
-      setError(e.message || "Failed to generate exam. Is the agent service running?");
+      const status = e.response?.status;
+      if (status === 401) {
+        navigate("/login", {
+          state: { message: "Your session has expired. Please sign in again to continue." },
+          replace: true,
+        });
+        return;
+      }
+      setError(e.response?.data?.error || e.message || "Failed to generate exam. Is the agent service running?");
     } finally {
       setLoading(false);
     }

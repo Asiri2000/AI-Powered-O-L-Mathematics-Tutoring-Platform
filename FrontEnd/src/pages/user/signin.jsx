@@ -17,6 +17,7 @@ const Signin = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
+
   const schools = [
     'Kg/Mw/Halpitiya K.V',
     'Kg/Mw/Parakrama M.V',
@@ -114,6 +115,7 @@ const Signin = () => {
 
         {/* Header */}
         <div className="text-center mb-8">
+        
           <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl mb-4 shadow-lg transform hover:scale-110 transition-transform duration-300">
             <svg
               className="w-10 h-10 text-white"
@@ -311,9 +313,9 @@ const Signin = () => {
                 ))}
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {/* <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/>
-                </svg>
+                </svg> */}
               </div>
               {errors.school && (
                 <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
@@ -371,7 +373,7 @@ const Signin = () => {
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM4.332 8.027a6.012 6.012 0 011.912-2.706C6.512 5.73 6.974 6 7.5 6A1.5 1.5 0 019 7.5V8a2 2 0 004 0 2 2 0 011.523-1.943A5.977 5.977 0 0116 10c0 .34-.028.675-.083 1H15a2 2 0 00-2 2v2.197A5.973 5.973 0 0110 16v-2a2 2 0 00-2-2 2 2 0 01-2-2 2 2 0 00-1.668-1.973z" clipRule="evenodd"/>
             </svg>
-            © 2024 Mathematics Tutoring Platform. All rights reserved.
+            © 2026 Mathematics Tutoring Platform. All rights reserved.
           </p>
         </div>
       </div>

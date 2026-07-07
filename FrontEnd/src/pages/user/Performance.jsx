@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { getOverallSummary, getChapterAnalytics } from "../../api";
 import {
   TrendingUp, Award, BookOpen, CheckCircle2, Zap, Star, AlertTriangle, Target,
@@ -92,12 +93,27 @@ const getLessonColor = (acc) => {
    MAIN COMPONENT
 =========================== */
 const Performance = () => {
+  const navigate = useNavigate();
   const [summary, setSummary] = useState(null);
   const [chapters, setChapters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    const token = sessionStorage.getItem("accessToken");
+    if (!token) {
+      navigate("/login", {
+        state: {
+          message: "You need to sign in first to check your performance.",
+        },
+        replace: true,
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    const token = sessionStorage.getItem("accessToken");
+    if (!token) return;
     const fetchAll = async () => {
       try {
         setLoading(true);
@@ -115,7 +131,7 @@ const Performance = () => {
 
   if (loading) return <LoadingScreen />;
   if (error) return <ErrorScreen message={error} />;
-if (!summary || Number(summary.total_attempts) === 0) return <EmptyScreen />;
+if (!summary || Number(summary.total_attempts) === 0) return <EmptyScreen navigate={navigate} />;
   const acc = parseFloat(summary.accuracy_percentage || 0);
   const level = getLevel(acc);
 
@@ -332,7 +348,7 @@ const ErrorScreen = ({ message }) => (
   </div>
 );
 
-const EmptyScreen = () => {
+const EmptyScreen = ({ navigate }) => {
 
   return (
     <div style={{ minHeight: "100vh", background: "#F3FBF6", padding: "4rem 2rem", display: "flex", flexDirection: "column", alignItems: "center" }}>
