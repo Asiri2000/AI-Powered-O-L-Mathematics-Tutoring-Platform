@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   Bot, User, Send, Sparkles, Calculator, Loader2,
-  Plus, Trash2, MessageSquare, Menu, X,
+  Plus, Trash2, MessageSquare, Menu, X, Mic, MicOff,
 } from 'lucide-react';
 import api from '../../api';
 import { formatMessage } from '../../utils/formatMessage';
-import { useLanguage, LANGUAGES } from '../../contexts/LanguageContext';
+import { LANGUAGES } from '../../contexts/LanguageContext';
 
 // ---- Constants ----
 const GUEST_TOKEN_KEY = 'guestToken';
@@ -18,6 +18,14 @@ const QUICK_QUESTIONS = [
   'Explain how to find the area of a circle',
   'Study tips for mathematics',
 ];
+
+/* Maps internal language codes to BCP-47 locales for the Web Speech API.
+   Chrome ships high-quality recognition for all three. */
+const SPEECH_LOCALES = {
+  en: 'en-US',
+  si: 'si-LK',
+  ta: 'ta-LK',
+};
 
 // ---- Helpers ----
 function getOrCreateGuestToken() {
@@ -34,7 +42,16 @@ const MathTutorChat = () => {
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const { language, setLanguage } = useLanguage();
+
+  // Local language state — independent from the global Google Translate mechanism.
+  // Initialised from whatever is persisted, but never triggers a page reload.
+  const [chatLanguage, setChatLanguage] = useState(() => {
+    try {
+      const stored = localStorage.getItem('appLanguage');
+      if (stored && LANGUAGES.some((l) => l.code === stored)) return stored;
+    } catch (_) {}
+    return 'en';
+  });
 
   // Session state
   const [sessions, setSessions] = useState([]);
@@ -49,11 +66,96 @@ const MathTutorChat = () => {
 
   const chatScrollRef = useRef(null);
   const inputRef = useRef(null);
+  const recognitionRef = useRef(null);
+
+  // Voice input state
+  const [isListening, setIsListening] = useState(false);
+  const [interimText, setInterimText] = useState('');
+  const [speechSupported, setSpeechSupported] = useState(false);
 
   // Ensure guest token exists
   useEffect(() => {
     getOrCreateGuestToken();
   }, []);
+
+  /* ── Speech Recognition ──
+     Initialises once on mount, re-creates when chatLanguage changes so the
+     recogniser always uses the correct locale. Cleans up on unmount. */
+  useEffect(() => {
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      setSpeechSupported(false);
+      return;
+    }
+    setSpeechSupported(true);
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;   // one utterance at a time
+    recognition.interimResults = true; // live preview while speaking
+    recognition.lang = SPEECH_LOCALES[chatLanguage] || 'en-US';
+    recognition.maxAlternatives = 1;
+
+    recognition.onresult = (event) => {
+      let interim = '';
+      let final = '';
+
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          final += transcript;
+        } else {
+          interim += transcript;
+        }
+      }
+
+      setInterimText(interim);
+
+      if (final) {
+        setInputText((prev) => (prev ? prev + ' ' + final : final));
+        setInterimText('');
+      }
+    };
+
+    recognition.onerror = (event) => {
+      console.warn('Speech recognition error:', event.error);
+      setIsListening(false);
+      setInterimText('');
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+      setInterimText('');
+    };
+
+    // Abort any in-flight recognition before replacing the instance
+    if (recognitionRef.current) {
+      recognitionRef.current.abort();
+    }
+    recognitionRef.current = recognition;
+
+    return () => {
+      recognition.abort();
+    };
+  }, [chatLanguage]);
+
+  const toggleListening = useCallback(() => {
+    const recognition = recognitionRef.current;
+    if (!recognition) return;
+
+    if (isListening) {
+      recognition.stop();
+    } else {
+      setIsListening(true);
+      setInterimText('');
+      try {
+        recognition.start();
+      } catch {
+        setIsListening(false);
+      }
+    }
+  }, [isListening]);
 
   // ---- Scroll ----
   const scrollToBottom = () => {
@@ -98,7 +200,6 @@ const MathTutorChat = () => {
           source: m.source,
         }))
       );
-      setLanguage(session.language || 'en');
       setActiveSessionId(sessionId);
       setSidebarOpen(false); // auto-close on mobile/overlay
     } catch {
@@ -111,7 +212,7 @@ const MathTutorChat = () => {
   // ---- Create new session ----
   const newSession = async () => {
     try {
-      const res = await api.post('/chat/sessions', { language });
+      const res = await api.post('/chat/sessions', { language: chatLanguage });
       const s = res.data.session;
       setSessions((prev) => [s, ...prev]);
       setActiveSessionId(s.id);
@@ -152,7 +253,7 @@ const MathTutorChat = () => {
     let sid = activeSessionId;
     if (!sid) {
       try {
-        const res = await api.post('/chat/sessions', { language });
+        const res = await api.post('/chat/sessions', { language: chatLanguage });
         sid = res.data.session.id;
         setSessions((prev) => [res.data.session, ...prev]);
         setActiveSessionId(sid);
@@ -164,7 +265,7 @@ const MathTutorChat = () => {
     try {
       const response = await api.post('/chat', {
         userInput: trimmed,
-        language,
+        language: chatLanguage,
         sessionId: sid,
       });
       const data = response.data;
@@ -209,8 +310,10 @@ const MathTutorChat = () => {
   };
 
   // ---- Render ----
+  // Google Translate must not touch this component – it has its own
+  // LLM-based language response mechanism, and GT DOM mutations break chat.
   return (
-   <div className="min-h-screen flex justify-center pt-4 sm:pt-8 bg-gray-100/80">
+   <div className="min-h-screen flex justify-center pt-4 sm:pt-8 bg-gray-100/80 notranslate" translate="no">
       {/* ========== CHAT BOX – centered, fixed size ========== */}
        <div className="w-[95%] sm:w-[90%] md:w-[80%] max-w-5xl h-[80vh] bg-white rounded-none md:rounded-2xl shadow-2xl border border-gray-200 overflow-hidden flex flex-col relative">
         {/* Sidebar overlay – slides over the chat area */}
@@ -299,10 +402,10 @@ const MathTutorChat = () => {
               {LANGUAGES.map(({ code, label }) => (
                 <button
                   key={code}
-                  onClick={() => setLanguage(code)}
+                  onClick={() => setChatLanguage(code)}
                   disabled={isLoading}
                   className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-all ${
-                    language === code
+                    chatLanguage === code
                       ? 'bg-[#1b7a39] text-white shadow-sm'
                       : 'text-gray-500 hover:text-gray-700'
                   }`}
@@ -422,6 +525,14 @@ const MathTutorChat = () => {
 
         {/* Input – always visible, never hidden */}
         <div className="shrink-0 border-t border-gray-200 bg-white/90 backdrop-blur-sm px-4 py-3">
+          {/* Live interim transcript while speaking */}
+          {isListening && interimText && (
+            <div className="mb-2 px-3 py-2 bg-green-50 border border-green-200 rounded-xl text-sm text-green-800 italic flex items-center gap-2">
+              <Mic className="w-4 h-4 text-green-500 animate-pulse shrink-0" />
+              <span>{interimText}</span>
+            </div>
+          )}
+
           <div className="flex items-center gap-3">
             <input
               ref={inputRef}
@@ -433,6 +544,26 @@ const MathTutorChat = () => {
               disabled={isLoading}
               className="flex-1 bg-gray-50 border border-gray-200 text-gray-800 text-sm rounded-2xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-500/40 focus:border-green-400 shadow-sm placeholder-gray-400 disabled:opacity-50 transition-all"
             />
+            {/* Mic button — only shown when the browser supports SpeechRecognition */}
+            {speechSupported && (
+              <button
+                type="button"
+                onClick={toggleListening}
+                disabled={isLoading}
+                className={`p-3 rounded-2xl shadow-md transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
+                  isListening
+                    ? 'bg-red-500 hover:bg-red-600 animate-pulse'
+                    : 'bg-gray-100 hover:bg-gray-200'
+                }`}
+                title={`Voice input (${chatLanguage.toUpperCase()})`}
+              >
+                {isListening ? (
+                  <MicOff className="w-5 h-5 text-white" />
+                ) : (
+                  <Mic className="w-5 h-5 text-gray-600" />
+                )}
+              </button>
+            )}
             <button
               onClick={() => handleSend(inputText)}
               disabled={!inputText.trim() || isLoading}

@@ -3,9 +3,11 @@ const { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } = require('@googl
 const DEFAULT_MODEL = 'gemini-1.5-flash-latest';
 
 const MODEL_FALLBACKS = [
+    // "gemini-3.5-flash",
     "gemini-2.5-flash",
-    "gemini-2.5-flash-lite",
-    "gemini-1.5-flash"
+    "gemini-3.1-flash-lite",
+    "gemini-2.5-flash-lite"
+   
 ];
 
 let MODEL_CACHE = { models: [], fetchedAt: 0 };

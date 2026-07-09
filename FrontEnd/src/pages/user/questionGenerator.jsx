@@ -72,69 +72,69 @@ const SYLLABUS = {
   ],
 
 
-   sinhala10:[
-    "පරිමිතිය",
-    "වර්ගමූල",
-    "භාග",
-    "ද්විපද ප්‍රකාශන",
-    "ත්‍රිකෝණවල සර්වසමතාව",
-    "වර්ගඵලය",
-    "වර්ගීය ප්‍රකාශනවල සාධකකරණය",
-    "ත්‍රිකෝණ I",
-    "ත්‍රිකෝණ II",
-    "ප්‍රතිලෝම සමානුපාත",
-    "දත්ත නිරූපණය",
-    "බීජීය ප්‍රකාශනවල ලඝු පොදු ගුණාකාරය",
-    "බීජීය භාග",
-    "ප්‍රතිශත",
-    "සමීකරණ",
-    "සමාන්තර චතුරස්‍ර I",
-    "සමාන්තර චතුරස්‍ර II",
-    "කුලක",
-    "ලඝුගණක I",
-    "ලඝුගණක II",
-    "ප්‍රස්තාර",
-    "අනුපාතය",
-    "සූත්‍ර",
-    "අංක ගණිත ප්‍රගති",
-    "බීජීය අසමානතා",
-    "සංඛ්‍යාත ව්‍යාප්ති",
-    "වෘත්තයක ජ්‍යා",
-    "නිර්මාණ",
-    "පෘෂ්ඨ වර්ගඵලය හා පරිමාව",
-    "සම්භාවිතාව",
-    "වෘත්තයක කෝණ",
-    "පරිමාණ රූප"
-  ],
+  //  sinhala10:[
+  //   "පරිමිතිය",
+  //   "වර්ගමූල",
+  //   "භාග",
+  //   "ද්විපද ප්‍රකාශන",
+  //   "ත්‍රිකෝණවල සර්වසමතාව",
+  //   "වර්ගඵලය",
+  //   "වර්ගීය ප්‍රකාශනවල සාධකකරණය",
+  //   "ත්‍රිකෝණ I",
+  //   "ත්‍රිකෝණ II",
+  //   "ප්‍රතිලෝම සමානුපාත",
+  //   "දත්ත නිරූපණය",
+  //   "බීජීය ප්‍රකාශනවල ලඝු පොදු ගුණාකාරය",
+  //   "බීජීය භාග",
+  //   "ප්‍රතිශත",
+  //   "සමීකරණ",
+  //   "සමාන්තර චතුරස්‍ර I",
+  //   "සමාන්තර චතුරස්‍ර II",
+  //   "කුලක",
+  //   "ලඝුගණක I",
+  //   "ලඝුගණක II",
+  //   "ප්‍රස්තාර",
+  //   "අනුපාතය",
+  //   "සූත්‍ර",
+  //   "අංක ගණිත ප්‍රගති",
+  //   "බීජීය අසමානතා",
+  //   "සංඛ්‍යාත ව්‍යාප්ති",
+  //   "වෘත්තයක ජ්‍යා",
+  //   "නිර්මාණ",
+  //   "පෘෂ්ඨ වර්ගඵලය හා පරිමාව",
+  //   "සම්භාවිතාව",
+  //   "වෘත්තයක කෝණ",
+  //   "පරිමාණ රූප"
+  // ],
 
-   sinhala11:[
+  //  sinhala11:[
 
-    "තාත්වික සංඛ්‍යා",
-    "ඝාත හා ලඝුගණක I",
-    "ඝාත හා ලඝුගණක II",
-    "ඝන වස්තූන්ගේ පෘෂ්ඨ වර්ගඵලය",
-    "ඝන වස්තූන්ගේ පරිමාව",
-    "ද්විපද ප්‍රකාශන",
-    "බීජීය භාග",
-    "සමාන්තර රේඛා අතර තල රූපවල වර්ගඵල",
-    "ප්‍රතිශත",
-    "කොටස් වෙළෙඳපොළ",
-    "මධ්‍ය ලක්ෂ්‍ය ප්‍රමේය",
-    "ප්‍රස්තාර",
-    "සමීකරණ",
-    "සමකෝණී ත්‍රිකෝණ",
-    "දත්ත නිරූපණය හා අර්ථකථනය",
-    "ජ්‍යාමිතික ප්‍රගති",
-    "පයිතගරස් ප්‍රමේය",
-    "ත්‍රිකෝණමිතිය",
-    "න්‍යාස",
-    "අසමානතා",
-    "චක්‍රීය චතුරස්‍ර",
-    "ස්පර්ශක",
-    "නිර්මාණ",
-    "කුලක",
-    "සම්භාවිතාව"
-   ]
+  //   "තාත්වික සංඛ්‍යා",
+  //   "ඝාත හා ලඝුගණක I",
+  //   "ඝාත හා ලඝුගණක II",
+  //   "ඝන වස්තූන්ගේ පෘෂ්ඨ වර්ගඵලය",
+  //   "ඝන වස්තූන්ගේ පරිමාව",
+  //   "ද්විපද ප්‍රකාශන",
+  //   "බීජීය භාග",
+  //   "සමාන්තර රේඛා අතර තල රූපවල වර්ගඵල",
+  //   "ප්‍රතිශත",
+  //   "කොටස් වෙළෙඳපොළ",
+  //   "මධ්‍ය ලක්ෂ්‍ය ප්‍රමේය",
+  //   "ප්‍රස්තාර",
+  //   "සමීකරණ",
+  //   "සමකෝණී ත්‍රිකෝණ",
+  //   "දත්ත නිරූපණය හා අර්ථකථනය",
+  //   "ජ්‍යාමිතික ප්‍රගති",
+  //   "පයිතගරස් ප්‍රමේය",
+  //   "ත්‍රිකෝණමිතිය",
+  //   "න්‍යාස",
+  //   "අසමානතා",
+  //   "චක්‍රීය චතුරස්‍ර",
+  //   "ස්පර්ශක",
+  //   "නිර්මාණ",
+  //   "කුලක",
+  //   "සම්භාවිතාව"
+  //  ]
 
 };
 
@@ -159,6 +159,7 @@ const QuestionGenerator = () => {
   const [selectedOption, setSelectedOption] = useState(null);
   const [feedback, setFeedback] = useState("idle"); // idle | correct | incorrect
   const [showSteps, setShowSteps] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const [selectedGrade, setSelectedGrade] = useState(10);
   const [selectedLesson, setSelectedLesson] = useState(SYLLABUS[10][0]);
@@ -167,6 +168,20 @@ const QuestionGenerator = () => {
   const lastQuestionRef = useRef(null);
   const questionRef = useRef(null);
   const startTimeRef = useRef(null);
+  const dropdownRef = useRef(null);
+
+  /* Close custom dropdown on outside click */
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    if (dropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [dropdownOpen]);
 
   const resetQuestion = () => {
     setQuestion(null);
@@ -285,20 +300,53 @@ const QuestionGenerator = () => {
           ))}
         </div>
 
-        {/* Lesson select */}
-        <select
-          value={selectedLesson}
-          onChange={(e) => setSelectedLesson(e.target.value)}
-          style={{
-            width: "100%", marginBottom: "14px", padding: "10px 14px",
-            border: "1.5px solid #e2e8f0", borderRadius: "10px",
-            fontSize: "0.95rem", color: "#0f172a", background: "#f8fafc",
-          }}
-        >
-          {SYLLABUS[selectedGrade].map((lesson) => (
-            <option key={lesson}>{lesson}</option>
-          ))}
-        </select>
+        {/* Lesson select — custom dropdown (Google Translate can't translate native <option> text) */}
+        <div ref={dropdownRef} style={{ position: "relative", marginBottom: "14px" }}>
+          <button
+            type="button"
+            onClick={() => setDropdownOpen((v) => !v)}
+            style={{
+              width: "100%", padding: "10px 14px", border: "1.5px solid #e2e8f0",
+              borderRadius: "10px", fontSize: "0.95rem", color: "#0f172a",
+              background: "#f8fafc", textAlign: "left", cursor: "pointer",
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+            }}
+          >
+            <span>{selectedLesson}</span>
+            <span style={{ marginLeft: "auto", color: "#94a3b8", fontSize: "0.8rem" }}>▼</span>
+          </button>
+          {dropdownOpen && (
+            <div
+              style={{
+                position: "absolute", top: "100%", left: 0, right: 0, zIndex: 50,
+                background: "#fff", border: "1px solid #e2e8f0", borderRadius: "10px",
+                boxShadow: "0 8px 24px rgba(0,0,0,0.12)", maxHeight: "240px",
+                overflowY: "auto", marginTop: "4px",
+              }}
+            >
+              {SYLLABUS[selectedGrade].map((lesson) => (
+                <div
+                  key={lesson}
+                  onClick={() => { setSelectedLesson(lesson); setDropdownOpen(false); }}
+                  style={{
+                    padding: "10px 14px", cursor: "pointer", fontSize: "0.95rem",
+                    color: "#0f172a", background: selectedLesson === lesson ? "#dcfce7" : "transparent",
+                    fontWeight: selectedLesson === lesson ? "700" : "400",
+                    transition: "background 0.15s",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (selectedLesson !== lesson) e.currentTarget.style.background = "#f1f5f9";
+                  }}
+                  onMouseLeave={(e) => {
+                    if (selectedLesson !== lesson) e.currentTarget.style.background = "transparent";
+                  }}
+                >
+                  {lesson}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Difficulty Pills */}
         <div style={{ display: "flex", gap: "8px", marginBottom: "16px", flexWrap: "wrap" }}>
